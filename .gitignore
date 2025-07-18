@@ -1,0 +1,7 @@
+# Virtual environment
+venv/
+
+# vacore and metadata files
+*.whl
+
+

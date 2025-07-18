@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f6fb;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 20%;
+      background-color: #ffffff;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      box-sizing: border-box;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar ul {
+      list-style-type: none;
+      padding-left: 0;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .sidebar ul li {
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+    }
+
+    .create-btn {
+      width: 100%;
+      background-color: #2563eb;
+      border: none;
+      padding: 10px 12px;
+      color: white;
+      font-weight: 600;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+
+    .main {
+      width: 80%;
+      padding: 16px 40px 24px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .title-box {
+      background: linear-gradient(to right, #2563eb, #4f46e5);
+      color: white;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .control-group {
+      flex: 1 1 200px;
+    }
+
+    .control-group label {
+      font-size: 14px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .control-group input,
+    .control-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .control-group button {
+      margin-top: 6px;
+      width: 100%;
+      background-color: #2563eb;
+      border: none;
+      padding: 8px;
+      color: white;
+      font-weight: 600;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .accordion {
+      background-color: #f9fafc;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .accordion::after {
+      content: '▼';
+      float: right;
+    }
+
+    .accordion.active::after {
+      content: '▲';
+    }
+
+    .panel {
+      display: none;
+      border: 1px solid #eee;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      background-color: white;
+      padding: 10px 18px 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    th {
+      background-color: #f1f5f9;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- ✅ Create New Button -->
+    <button class="create-btn" onclick="window.location.href='/new-analysis'">+ Create New Analysis</button>
+
+    <h3>Saved Analysis</h3>
+    <ul id="savedAnalysisList"></ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="title-box" id="analysisHeading">Dashboard</div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="control-group">
+        <label>Add Company</label>
+        <input type="text" id="addCompanyInput" placeholder="e.g. Apple" />
+        <button onclick="addCompany()">Add Company</button>
+      </div>
+      <div class="control-group">
+        <label>Add Line Item</label>
+        <input type="text" id="addLineItemInput" placeholder="e.g. Revenue" />
+        <button onclick="addLineItem()">Add Line Item</button>
+      </div>
+      <div class="control-group">
+        <label>Add Period</label>
+        <input type="text" id="addPeriodInput" placeholder="e.g. CY-2023" />
+        <button onclick="addPeriod()">Add Period</button>
+      </div>
+      <div class="control-group">
+        <label>Change Currency</label>
+        <select id="currencySelector">
+          <option value="USD">$ - USD</option>
+          <option value="INR">₹ - INR</option>
+          <option value="EUR">€ - EUR</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Dynamic Line Items -->
+    <div id="lineItemSection"></div>
+  </div>
+
+  <script>
+    let selectedCompanies = JSON.parse(localStorage.getItem("selectedCompanies") || "[]");
+    let selectedLineItems = JSON.parse(localStorage.getItem("selectedLineItems") || "[]");
+    let selectedPeriods = JSON.parse(localStorage.getItem("selectedPeriods") || "[]");
+    let selectedCurrency = localStorage.getItem("selectedCurrency") || "USD";
+
+    document.getElementById("currencySelector").value = selectedCurrency;
+    document.getElementById("analysisHeading").innerText = localStorage.getItem("analysisTitle") || "Dashboard";
+
+    const savedTitles = JSON.parse(localStorage.getItem("savedAnalyses") || "[]");
+    const savedList = document.getElementById("savedAnalysisList");
+    savedTitles.forEach(title => {
+      const li = document.createElement("li");
+      li.innerText = title;
+      li.onclick = () => {
+        localStorage.setItem("analysisTitle", title);
+        selectedCompanies = JSON.parse(localStorage.getItem("selectedCompanies") || "[]");
+        selectedLineItems = JSON.parse(localStorage.getItem("selectedLineItems") || "[]");
+        selectedPeriods = JSON.parse(localStorage.getItem("selectedPeriods") || "[]");
+        selectedCurrency = localStorage.getItem("selectedCurrency") || "USD";
+        document.getElementById("currencySelector").value = selectedCurrency;
+        document.getElementById("analysisHeading").innerText = title;
+        renderLineItems();
+      };
+      savedList.appendChild(li);
+    });
+
+    async function fetchData(company, lineItem, period) {
+      try {
+        const res = await fetch(`/api/data?company=${encodeURIComponent(company)}&line_item=${encodeURIComponent(lineItem)}&period=${encodeURIComponent(period)}&currency=${selectedCurrency}`);
+        const json = await res.json();
+        return json.value || '';
+      } catch (e) {
+        return 'ERR';
+      }
+    }
+
+    async function renderLineItems() {
+      const section = document.getElementById("lineItemSection");
+      section.innerHTML = "";
+
+      for (const item of selectedLineItems) {
+        const acc = document.createElement("div");
+        acc.className = "accordion";
+        acc.textContent = item;
+
+        const panel = document.createElement("div");
+        panel.className = "panel";
+
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<th>Company</th>` + selectedPeriods.map(p => `<th>${p}</th>`).join('');
+        thead.appendChild(tr);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+        for (const company of selectedCompanies) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${company}</td>`;
+          for (const period of selectedPeriods) {
+            const td = document.createElement("td");
+            td.textContent = await fetchData(company, item, period);
+            row.appendChild(td);
+          }
+          tbody.appendChild(row);
+        }
+
+        table.appendChild(tbody);
+        panel.appendChild(table);
+
+        section.appendChild(acc);
+        section.appendChild(panel);
+      }
+
+      document.querySelectorAll(".accordion").forEach(acc => {
+        acc.addEventListener("click", function () {
+          this.classList.toggle("active");
+          const panel = this.nextElementSibling;
+          panel.style.display = panel.style.display === "block" ? "none" : "block";
+        });
+      });
+    }
+
+    renderLineItems();
+
+    function addCompany() {
+      const input = document.getElementById("addCompanyInput");
+      const value = input.value.trim();
+      if (value && !selectedCompanies.includes(value)) {
+        selectedCompanies.push(value);
+        localStorage.setItem("selectedCompanies", JSON.stringify(selectedCompanies));
+        renderLineItems();
+        input.value = "";
+      }
+    }
+
+    function addLineItem() {
+      const input = document.getElementById("addLineItemInput");
+      const value = input.value.trim();
+      if (value && !selectedLineItems.includes(value)) {
+        selectedLineItems.push(value);
+        localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
+        renderLineItems();
+        input.value = "";
+      }
+    }
+
+    function addPeriod() {
+      const input = document.getElementById("addPeriodInput");
+      const value = input.value.trim();
+      if (value && !selectedPeriods.includes(value)) {
+        selectedPeriods.push(value);
+        localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
+        renderLineItems();
+        input.value = "";
+      }
+    }
+
+    document.getElementById("currencySelector").addEventListener("change", function () {
+      selectedCurrency = this.value;
+      localStorage.setItem("selectedCurrency", selectedCurrency);
+      renderLineItems();
+    });
+  </script>
+</body>
+</html>
