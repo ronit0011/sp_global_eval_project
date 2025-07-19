@@ -4,6 +4,9 @@ from vacore.metadata import company_meta_data as comeda
 from vacore.searchengine.searchengine_elastic import get_advance_search_data_from_es
 from vacore.searchengine.es_bulk_insert import fetch_company_info
 from vacore.metadata.sli_parameter_data import get_company_sli_param_map
+from vacore.metadata.company_period_data import CompanyPeriodData as cop
+from vacore.dal.standardized_data import get_fy_data
+import traceback
 
 app = Flask(__name__)
 
@@ -14,242 +17,181 @@ vacore.CONFIG.set_config(config)
 
 # --------- ROUTES ---------
 
-# ✅ Default route - load dashboard directly
 @app.route('/')
 def home():
     return redirect(url_for('dashboard'))
 
-# STEP 1: index.html - used to create a new analysis
 @app.route('/new-analysis')
 def new_analysis():
     return render_template('index.html')
 
-# STEP 2: dashboard.html - main dashboard page
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-    if request.method == 'POST':
-        selected_companies = request.form.getlist('companies[]')
-        selected_periods = request.form.getlist('periods[]')
-        selected_line_items = request.form.getlist('line_items[]')
+    return render_template('dashboard.html')
 
-        return render_template(
-            'dashboard.html',
-            companies=selected_companies,
-            periods=selected_periods,
-            line_items=selected_line_items
-        )
-    else:
-        return render_template('dashboard.html')
-
-# API: Fetch list of companies (for static dropdown fallback or testing)
-@app.route('/api/company-list')
-def get_company_list():
-    try:
-        rows, _ = fetch_company_info()
-        companies = [
-            {"companyid": row["cid"], "name": row["company_name"]}
-            for row in rows if "cid" in row and "company_name" in row
-        ]
-        return jsonify(companies)
-    except Exception as e:
-        return jsonify({"error": str(e)})
-
-# API: Fetch metadata company list (optional, not used currently)
-@app.route('/api/company-data')
-def company_data():
-    try:
-        data = comeda.get_company_meta_data()
-        return jsonify(data[:100])
-    except Exception as e:
-        return jsonify({"error": str(e)})
-
-# API: Dummy data for cell values (dashboard)
-@app.route('/api/data')
-def get_data():
-    company = request.args.get('company')
-    line_item = request.args.get('line_item')
-    period = request.args.get('period')
-    currency = request.args.get('currency')
-
-    # Dummy response
-    return jsonify({"value": f"{line_item} of {company} in {period} ({currency})"})
-
-# ✅ API: ElasticSearch-powered Company Name Autocomplete
-
+# --------- Company Search ---------
 @app.route('/api/search-companies')
 def search_companies():
-    search_text = request.args.get('q', '').strip().lower()
-    print("🔍 Search Text:", search_text)
-
-    if not search_text:
+    query = request.args.get("q", "").strip()
+    if not query:
         return jsonify([])
-
+    
     es_query = {
         "query": {
             "bool": {
                 "should": [
-                    {
-                        "wildcard": {
-                            "company_name": {
-                                "value": f"*{search_text}*"
-                            }
-                        }
-                    },
-                    {
-                        "wildcard": {
-                            "ticker": {
-                                "value": f"*{search_text}*"
-                            }
-                        }
-                    }
+                    {"wildcard": {"company_name": {"value": f"*{query}*"}}},
+                    {"wildcard": {"ticker": {"value": f"*{query}*"}}}
                 ]
             }
         },
-        "collapse": {
-            "field": "cid"
-        }
+        "collapse": {"field": "cid"}
     }
 
     try:
-        results = get_advance_search_data_from_es(es_query)
-        hits = results.get("hits", {}).get("hits", [])
-
-        print("🟢 Raw Hits:", hits)
-
+        result = get_advance_search_data_from_es(es_query)
+        hits = result.get("hits", {}).get("hits", [])
         suggestions = []
         for item in hits:
-            print("🔎 Inspecting Hit:", item)
-
             source = item.get("_source", {})
-            company_id = source.get("companyid") or source.get("cid")
-            company_name = source.get("company_name") or source.get("name")
-
-            if company_id and company_name:
-                suggestions.append({
-                    "companyid": company_id,
-                    "name": company_name
-                })
-
-        print("✅ Suggestions:", suggestions)
+            cid = source.get("cid") or source.get("companyid")
+            name = source.get("company_name") or source.get("name")
+            if cid and name:
+                suggestions.append({"companyid": cid, "name": name})
         return jsonify(suggestions)
-
     except Exception as e:
-        print("❌ Elasticsearch error:", str(e))
         return jsonify([])
 
-
-
-
-# @app.route('/api/search-companies')
-# def search_companies():
-#     search_text = request.args.get('q', '').strip().lower()
-#     if not search_text:
-#         return jsonify([])
-    
-#     es_query = {
-#     "query": {
-#         "bool": {
-#             "should": [
-#                 {
-#                     "wildcard": {
-#                         "company_name.keyword": f"*{search_text.upper()}*"
-#                     }
-#                 },
-#                 {
-#                     "wildcard": {
-#                         "ticker.keyword": f"*{search_text.upper()}*"
-#                     }
-#                 }
-#             ]
-#         }
-#     },
-#     "collapse": {
-#         "field": "cid"
-#     }
-# }
-
-
-
-#     # es_query = {
-#     #     "query": {
-#     #         "query_string": {
-#     #             "query": f"*{search_text}*",
-#     #             "fields": ["company_name", "ticker"]
-#     #         }
-#     #     },
-#     #     "collapse": {
-#     #         "field": "cid"
-#     #     }
-#     # }
-
-
-#     try:
-#         result = get_advance_search_data_from_es(es_query)
-
-#         # ✅ Correctly extract hits
-#         hit_list = result.get("hits", {}).get("hits", [])
-
-#         suggestions = []
-#         for item in hit_list:
-#             source = item.get("_source", {})
-#             company_id = source.get("cid")
-#             company_name = source.get("company_name")
-#             if company_id and company_name:
-#                 suggestions.append({
-#                     "companyid": company_id,
-#                     "name": company_name
-#                 })
-
-#         return jsonify(suggestions)
-
-#     except Exception as e:
-#         print("Elasticsearch error:", str(e))
-#         return jsonify({"error": str(e)})
-
-
-
-#     # try:
-#     #     results = get_advance_search_data_from_es(es_query)
-#     #     suggestions = []
-#     #     for item in results:
-#     #         source = item.get("_source", item)
-#     #         company_id = source.get("cid") or source.get("companyid")
-#     #         company_name = source.get("company_name") or source.get("name")
-#     #         if company_id and company_name:
-#     #             suggestions.append({"companyid": company_id, "name": company_name})
-#     #     return jsonify(suggestions)
-#     # except Exception as e:
-#     #     print("Elasticsearch error:", str(e))
-#     #     return jsonify({"error": str(e)})
-
-
-
-
+# --------- Line Items ---------
 @app.route('/api/get-line-items', methods=['POST'])
 def get_line_items_for_companies():
     try:
         data = request.get_json()
-        company_ids = data.get("company_ids", [])  # list of integers
-        all_items = {}
+        company_ids = data.get("company_ids", [])
+        line_item_counter = {}
 
         for cid in company_ids:
-            item_map = get_company_sli_param_map(cid)
-            for label, details in item_map.items():
-                if label not in all_items:
-                    all_items[label] = details  # Only add once
+            items = get_company_sli_param_map(cid)
+            if not isinstance(items, list):
+                continue
+            for item in items:
+                sli_id = item.get("UniqueSliId")
+                sli_name = item.get("SliName", "Unnamed")
+                param = item.get("Category", "General")
+                if sli_id not in line_item_counter:
+                    line_item_counter[sli_id] = {"name": sli_name, "param": param, "count": 1}
+                else:
+                    line_item_counter[sli_id]["count"] += 1
 
-        line_item_list = [
-            {"name": key, "sli_id": value["sli_id"], "param": value["param"]}
-            for key, value in all_items.items()
-        ]
-
+        line_item_list = []
+        for sli_id, info in line_item_counter.items():
+            line_item_list.append({
+                "sli_id": sli_id,
+                "name": f"{info['name']} ({info['count']})",
+                "param": info["param"]
+            })
         return jsonify(line_item_list)
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# --------- Periods ---------
+@app.route('/api/get-periods', methods=['POST'])
+def get_periods():
+    try:
+        data = request.get_json()
+        company_ids = data.get("company_ids", [])
+        period_type = data.get("period_type", "FY")
 
+        cpd = cop(company_ids)
+        mapping = cpd.company_calendar_to_fiscal_map
 
-# ✅ Run the Flask server
+        all_periods = set()
+        for cid in company_ids:
+            company_map = mapping.get(cid, {})
+            if period_type == "FY":
+                fy_set = {v for v in company_map.values() if isinstance(v, str) and v.startswith("FY-")}
+                all_periods.update(fy_set)
+            elif period_type == "CY":
+                cy_set = {k for k in company_map if isinstance(k, str) and k.startswith("CY-")}
+                all_periods.update(cy_set)
+
+        sorted_periods = sorted(all_periods, key=lambda x: int(x.split("-")[1]))
+        return jsonify(sorted_periods)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --------- Batch Data ---------
+@app.route('/api/batch-data', methods=['POST'])
+def batch_data():
+    try:
+        data = request.get_json()
+        companies = data.get("companies", [])
+        periods = data.get("periods", [])
+        line_items = data.get("line_items", [])
+        currency = data.get("currency", "USD")
+
+        # 1. Map company names to IDs
+        company_ids = {}
+        for company in companies:
+            query = {
+                "query": {
+                    "bool": {
+                        "must": [{"match_phrase": {"name.keyword": company}}]
+                    }
+                },
+                "collapse": {"field": "cid"}
+            }
+            results = get_advance_search_data_from_es(query)
+            hits = results.get("hits", {}).get("hits", [])
+            if hits:
+                source = hits[0]["_source"]
+                cid = source.get("cid") or source.get("companyid")
+                if cid:
+                    company_ids[company] = cid
+
+        # 2. Map line items to SLI IDs
+        sli_ids = {}
+        for company, cid in company_ids.items():
+            items = get_company_sli_param_map(cid)
+            for line_item in line_items:
+                label = line_item.split("(")[0].strip()
+                for item in items:
+                    if item.get("SliName", "").strip().lower() == label.lower():
+                        sli_ids[line_item] = item.get("UniqueSliId")
+                        break
+
+        # 3. Fetch financial data
+        result = get_fy_data(
+            list_company_id=list(company_ids.values()),
+            list_universal_or_uniquesli_id=list(sli_ids.values()),
+            list_fy_cy=periods,
+            list_source_id=[13001],  # vaactuals.consensus
+            is_uniquesli_id=True,
+            to_currency_iso_code=currency,
+            need_formatting=True
+        )
+
+        # 4. Build response
+        response = {}
+        for company, cid in company_ids.items():
+            response[company] = {}
+            for line_item, sli_id in sli_ids.items():
+                response[company][line_item] = {}
+                for period in periods:
+                    value = (
+                        result.get(cid, {})
+                              .get(13001, {})
+                              .get(sli_id, {})
+                              .get(period, {})
+                              .get("v", "N/A")
+                    )
+                    response[company][line_item][period] = value
+        return jsonify(response)
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)})
+
+# --------- Run ---------
 if __name__ == "__main__":
     app.run(debug=True)

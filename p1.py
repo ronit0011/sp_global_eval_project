@@ -1,0 +1,2 @@
+from vacore.metadata.sli_parameter_data import get_company_sli_param_map
+print(get_company_sli_param_map(16128))

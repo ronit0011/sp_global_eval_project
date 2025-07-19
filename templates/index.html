@@ -14,7 +14,6 @@
       height: 100vh;
       margin: 0;
     }
-
     .container {
       background-color: white;
       padding: 40px 60px;
@@ -23,20 +22,17 @@
       width: 600px;
       max-width: 90%;
     }
-
     h2 {
       text-align: center;
       font-size: 26px;
       font-weight: 600;
       margin-bottom: 30px;
     }
-
     .steps {
       display: flex;
       justify-content: space-between;
       margin-bottom: 30px;
     }
-
     .step {
       display: flex;
       flex-direction: column;
@@ -45,11 +41,9 @@
       font-weight: 600;
       font-size: 14px;
     }
-
     .step.active {
       color: #2563eb;
     }
-
     .step-circle {
       background-color: #bbb;
       color: white;
@@ -61,18 +55,11 @@
       align-items: center;
       margin-bottom: 6px;
     }
-
     .step.active .step-circle {
       background-color: #2563eb;
     }
-
-    .form-step {
-      display: none;
-    }
-
-    .form-step.active {
-      display: block;
-    }
+    .form-step { display: none; }
+    .form-step.active { display: block; }
 
     input[type="text"] {
       width: 100%;
@@ -82,13 +69,11 @@
       border-radius: 8px;
       font-size: 16px;
     }
-
     .btn-row {
       display: flex;
       justify-content: space-between;
       gap: 10px;
     }
-
     .btn-primary {
       background-color: #2563eb;
       color: white;
@@ -98,12 +83,10 @@
       cursor: pointer;
       font-weight: 600;
     }
-
     .btn-primary:disabled {
       background-color: #ccc;
       cursor: not-allowed;
     }
-
     .success-message {
       background-color: #d1fae5;
       color: #065f46;
@@ -112,11 +95,7 @@
       font-weight: 600;
       text-align: center;
     }
-
-    ul {
-      padding-left: 20px;
-    }
-
+    ul { padding-left: 20px; }
     .suggestions {
       position: absolute;
       background: white;
@@ -126,19 +105,14 @@
       overflow-y: auto;
       z-index: 10;
     }
-
     .suggestions div {
       padding: 8px 12px;
       cursor: pointer;
     }
-
     .suggestions div:hover {
       background-color: #f0f0f0;
     }
-
-    .checkbox-list div {
-      margin-bottom: 8px;
-    }
+    .checkbox-list div { margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -160,16 +134,42 @@
       <button class="btn-primary" onclick="addCompany()">Add</button>
       <h4>Selected Companies:</h4>
       <ul id="selectedCompanies"></ul>
+      <button class="btn-primary" onclick="clearSelectedCompanies()">🗑️ Clear Companies</button>
       <div class="btn-row" style="justify-content: flex-end;">
-        <button class="btn-primary" onclick="nextStep(1)" id="nextBtn1" disabled>Next</button>
+        <button class="btn-primary" onclick="nextStep(1)" id="nextBtn1">Next</button>
       </div>
     </div>
 
     <!-- Step 2 -->
     <div id="step2" class="form-step">
       <h3>Select Line Items:</h3>
-      <div id="lineItemList" class="checkbox-list"></div>
+      <div id="lineItemList" class="checkbox-list" style="max-height: 250px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 8px;"></div>
+
+      <div style="margin-top: 20px;">
+        <h4>Selected Line Items (<span id="selectedLineItemCount">0</span>):</h4>
+        <ul id="selectedLineItemPreview" style="list-style-type: disc; padding-left: 20px;"></ul>
+      </div>
+
+      <hr style="margin: 30px 0;" />
+
+      <h3>Select Period Type:</h3>
+      <div style="margin-bottom: 16px;">
+        <label><input type="radio" name="periodType" value="FY" checked onchange="fetchPeriods()"> Fiscal Year</label>
+        <label style="margin-left: 20px;"><input type="radio" name="periodType" value="CY" onchange="fetchPeriods()"> Calendar Year</label>
+      </div>
+
       <div class="btn-row">
+        <div style="flex: 1;">
+          <label for="fromPeriod">From:</label>
+          <select id="fromPeriod" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;"></select>
+        </div>
+        <div style="flex: 1;">
+          <label for="toPeriod">To:</label>
+          <select id="toPeriod" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;"></select>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top: 20px;">
         <button class="btn-primary" onclick="prevStep(2)">Back</button>
         <button class="btn-primary" onclick="nextStep(2)">Next</button>
       </div>
@@ -196,8 +196,6 @@
   <script>
     let step = 1;
     const companies = [];
-    const lineItems = [];
-    const periods = [];
     let selectedCompanyObjects = [];
 
     function nextStep(current) {
@@ -205,10 +203,7 @@
       document.getElementById(`step${current + 1}`).classList.add("active");
       document.getElementById(`step${current}Indicator`).classList.remove("active");
       document.getElementById(`step${current + 1}Indicator`).classList.add("active");
-
-      if (current === 1) {
-        fetchLineItemsFromBackend();
-      }
+      if (current === 1) fetchLineItemsFromBackend();
     }
 
     function prevStep(current) {
@@ -222,22 +217,13 @@
       const input = document.getElementById("companyInput");
       const query = input.value.trim();
       const suggestionBox = document.getElementById("companySuggestions");
-
-      if (query.length < 1) {
-        suggestionBox.style.display = "none";
-        return;
-      }
+      if (query.length < 1) return suggestionBox.style.display = "none";
 
       fetch(`/api/search-companies?q=${query}`)
         .then(res => res.json())
         .then(data => {
           suggestionBox.innerHTML = "";
-
-          if (!Array.isArray(data) || data.length === 0) {
-            suggestionBox.style.display = "none";
-            return;
-          }
-
+          if (!Array.isArray(data) || data.length === 0) return suggestionBox.style.display = "none";
           data.forEach(company => {
             const div = document.createElement("div");
             div.textContent = company.name;
@@ -249,11 +235,7 @@
             };
             suggestionBox.appendChild(div);
           });
-
           suggestionBox.style.display = "block";
-        })
-        .catch(err => {
-          console.error("Autocomplete fetch error:", err);
         });
     }
 
@@ -261,7 +243,6 @@
       const input = document.getElementById("companyInput");
       const name = input.value.trim();
       const id = input.dataset.companyId;
-
       if (name && id && !companies.includes(name)) {
         companies.push(name);
         selectedCompanyObjects.push({ name, id });
@@ -269,7 +250,6 @@
         document.getElementById("nextBtn1").disabled = false;
         localStorage.setItem("selectedCompanyObjects", JSON.stringify(selectedCompanyObjects));
       }
-
       input.value = "";
       input.dataset.companyId = "";
       document.getElementById("companySuggestions").style.display = "none";
@@ -285,10 +265,17 @@
       });
     }
 
-    function fetchLineItemsFromBackend() {
-      const selectedCompanyObjects = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
-      const companyIds = selectedCompanyObjects.map(c => parseInt(c.id));
+    function clearSelectedCompanies() {
+      localStorage.removeItem("selectedCompanyObjects");
+      companies.length = 0;
+      selectedCompanyObjects.length = 0;
+      updateList(companies, "selectedCompanies");
+      document.getElementById("nextBtn1").disabled = true;
+    }
 
+    function fetchLineItemsFromBackend() {
+      const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
+      const companyIds = stored.map(c => parseInt(c.id));
       fetch("/api/get-line-items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -296,15 +283,15 @@
       })
         .then(res => res.json())
         .then(data => {
-          const listContainer = document.getElementById("lineItemList");
-          listContainer.innerHTML = "";
-
+          const container = document.getElementById("lineItemList");
+          container.innerHTML = "";
           data.forEach(item => {
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.id = item.sli_id;
-            checkbox.value = item.sli_id;
+            checkbox.value = item.name;
             checkbox.name = "line_items";
+            checkbox.addEventListener("change", updateSelectedLineItemsPreview);
 
             const label = document.createElement("label");
             label.htmlFor = item.sli_id;
@@ -313,9 +300,55 @@
             const div = document.createElement("div");
             div.appendChild(checkbox);
             div.appendChild(label);
-            listContainer.appendChild(div);
+            container.appendChild(div);
+          });
+
+          fetchPeriods();
+        });
+    }
+
+    function fetchPeriods() {
+      const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
+      const companyIds = stored.map(c => parseInt(c.id));
+      if (!companyIds.length) return;
+
+      const periodType = document.querySelector('input[name="periodType"]:checked').value;
+
+      fetch("/api/get-periods", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_ids: companyIds, period_type: periodType })
+      })
+        .then(res => res.json())
+        .then(data => {
+          const fromSelect = document.getElementById("fromPeriod");
+          const toSelect = document.getElementById("toPeriod");
+          fromSelect.innerHTML = "";
+          toSelect.innerHTML = "";
+
+          data.forEach(period => {
+            const fromOpt = document.createElement("option");
+            fromOpt.value = fromOpt.textContent = period;
+            fromSelect.appendChild(fromOpt);
+
+            const toOpt = document.createElement("option");
+            toOpt.value = toOpt.textContent = period;
+            toSelect.appendChild(toOpt);
           });
         });
+    }
+
+    function updateSelectedLineItemsPreview() {
+      const checked = Array.from(document.querySelectorAll('input[name="line_items"]:checked')).map(cb => cb.value);
+      const previewList = document.getElementById("selectedLineItemPreview");
+      const countSpan = document.getElementById("selectedLineItemCount");
+      previewList.innerHTML = "";
+      checked.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        previewList.appendChild(li);
+      });
+      countSpan.textContent = checked.length;
     }
 
     function saveAnalysis() {
@@ -329,9 +362,26 @@
       }
 
       const selectedLineItems = Array.from(document.querySelectorAll('input[name="line_items"]:checked')).map(cb => cb.value);
+      const fromPeriod = document.getElementById("fromPeriod").value;
+      const toPeriod = document.getElementById("toPeriod").value;
+
       localStorage.setItem("analysisTitle", title);
       localStorage.setItem("selectedCompanies", JSON.stringify(companies));
       localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
+    
+      // Extract start and end year from FY-XXXX or CY-XXXX
+const startYear = parseInt(fromPeriod.split("-")[1]);
+const endYear = parseInt(toPeriod.split("-")[1]);
+const prefix = fromPeriod.split("-")[0]; // FY or CY
+
+// Generate all periods in range
+const selectedPeriods = [];
+for (let year = startYear; year <= endYear; year++) {
+  selectedPeriods.push(`${prefix}-${year}`);
+}
+
+localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
+
       localStorage.setItem("savedAnalyses", JSON.stringify([...allTitles, title]));
 
       document.getElementById("step3").classList.remove("active");
