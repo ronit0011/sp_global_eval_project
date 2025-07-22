@@ -1,6 +1,6 @@
 #  Financial Analysis Dashboard (VACore Powered)
 
-A full-stack web application for comparative financial analysis across companies using line items, fiscal/calendar periods, and currency normalization. Built with a modern HTML/CSS/JS frontend and a Flask backend powered by S&P's internal VACore API.
+A full-stack web application for comparative financial analysis across companies using line items, fiscal/calendar periods. Built with a modern HTML/CSS/JS frontend and a Flask backend powered by S&P's internal VACore API.
 
 ---
 
