@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- --------- Meta & Title --------- -->
   <meta charset="UTF-8" />
   <title>New Analysis Table</title>
+
+  <!-- --------- Font --------- -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- --------- Styles --------- -->
   <style>
+    /* --------- General Layout --------- */
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f4f6fb;
@@ -14,25 +20,33 @@
       height: 100vh;
       margin: 0;
     }
+
     .container {
       background-color: white;
       padding: 40px 60px;
       border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
       width: 600px;
       max-width: 90%;
+      transition: all 0.3s ease-in-out;
     }
+
+    /* --------- Headings --------- */
     h2 {
       text-align: center;
       font-size: 26px;
       font-weight: 600;
       margin-bottom: 30px;
+      color: #1f2937;
     }
+
+    /* --------- Stepper Style --------- */
     .steps {
       display: flex;
       justify-content: space-between;
       margin-bottom: 30px;
     }
+
     .step {
       display: flex;
       flex-direction: column;
@@ -40,10 +54,13 @@
       color: #bbb;
       font-weight: 600;
       font-size: 14px;
+      transition: color 0.3s ease;
     }
+
     .step.active {
       color: #2563eb;
     }
+
     .step-circle {
       background-color: #bbb;
       color: white;
@@ -54,13 +71,24 @@
       justify-content: center;
       align-items: center;
       margin-bottom: 6px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
     }
+
     .step.active .step-circle {
       background-color: #2563eb;
     }
-    .form-step { display: none; }
-    .form-step.active { display: block; }
 
+    /* --------- Form Step Visibility --------- */
+    .form-step {
+      display: none;
+    }
+
+    .form-step.active {
+      display: block;
+    }
+
+    /* --------- Input Styling --------- */
     input[type="text"] {
       width: 100%;
       padding: 12px 14px;
@@ -68,12 +96,38 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 16px;
+      transition: all 0.3s ease;
     }
+
+    input[type="text"]:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+      outline: none;
+    }
+
+    /* --------- Select Dropdown Styling --------- */
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+      outline: none;
+    }
+
+    /* --------- Button Row Layout --------- */
     .btn-row {
       display: flex;
       justify-content: space-between;
       gap: 10px;
     }
+
+    /* --------- Button Styling --------- */
     .btn-primary {
       background-color: #2563eb;
       color: white;
@@ -82,11 +136,22 @@
       border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+      transition: all 0.3s ease;
     }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
     .btn-primary:disabled {
       background-color: #ccc;
       cursor: not-allowed;
+      box-shadow: none;
     }
+
+    /* --------- Success Message Box --------- */
     .success-message {
       background-color: #d1fae5;
       color: #065f46;
@@ -95,7 +160,12 @@
       font-weight: 600;
       text-align: center;
     }
-    ul { padding-left: 20px; }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    /* --------- Autocomplete Suggestion Box --------- */
     .suggestions {
       position: absolute;
       background: white;
@@ -104,27 +174,54 @@
       max-height: 200px;
       overflow-y: auto;
       z-index: 10;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
+
     .suggestions div {
       padding: 8px 12px;
       cursor: pointer;
+      transition: background 0.2s;
     }
+
     .suggestions div:hover {
       background-color: #f0f0f0;
     }
-    .checkbox-list div { margin-bottom: 8px; }
+
+    /* --------- Checkbox List (Line Items) --------- */
+    .checkbox-list div {
+      margin-bottom: 8px;
+    }
+
+    .checkbox-list input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.1);
+      cursor: pointer;
+    }
+
+    .checkbox-list label {
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .checkbox-list label:hover {
+      color: #2563eb;
+    }
   </style>
 </head>
 <body>
+  <!-- --------- Main Centered Form Container --------- -->
   <div class="container">
     <h2>New Analysis Table</h2>
+
+    <!-- --------- Step Progress Indicators --------- -->
     <div class="steps">
       <div class="step active" id="step1Indicator"><div class="step-circle">1</div>Company Selection</div>
       <div class="step" id="step2Indicator"><div class="step-circle">2</div>Line Items</div>
       <div class="step" id="step3Indicator"><div class="step-circle">3</div>Analysis Title</div>
     </div>
 
-    <!-- Step 1 -->
+    <!-- ============================ STEP 1: COMPANY SELECTION ============================ -->
     <div id="step1" class="form-step active">
       <label for="companyInput">Search Company:</label>
       <div style="position: relative;">
@@ -132,15 +229,17 @@
         <div id="companySuggestions" class="suggestions" style="display: none;"></div>
       </div>
       <button class="btn-primary" onclick="addCompany()">Add</button>
+
       <h4>Selected Companies:</h4>
       <ul id="selectedCompanies"></ul>
-      <button class="btn-primary" onclick="clearSelectedCompanies()">🗑️ Clear Companies</button>
+      <button class="btn-primary" onclick="clearSelectedCompanies()">Clear</button>
+
       <div class="btn-row" style="justify-content: flex-end;">
         <button class="btn-primary" onclick="nextStep(1)" id="nextBtn1">Next</button>
       </div>
     </div>
 
-    <!-- Step 2 -->
+    <!-- ============================ STEP 2: LINE ITEM SELECTION & PERIOD RANGE ============================ -->
     <div id="step2" class="form-step">
       <h3>Select Line Items:</h3>
       <div id="lineItemList" class="checkbox-list" style="max-height: 250px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 8px;"></div>
@@ -152,12 +251,14 @@
 
       <hr style="margin: 30px 0;" />
 
+      <!-- --------- Period Type Toggle --------- -->
       <h3>Select Period Type:</h3>
       <div style="margin-bottom: 16px;">
         <label><input type="radio" name="periodType" value="FY" checked onchange="fetchPeriods()"> Fiscal Year</label>
         <label style="margin-left: 20px;"><input type="radio" name="periodType" value="CY" onchange="fetchPeriods()"> Calendar Year</label>
       </div>
 
+      <!-- --------- Period Range Dropdowns --------- -->
       <div class="btn-row">
         <div style="flex: 1;">
           <label for="fromPeriod">From:</label>
@@ -169,13 +270,14 @@
         </div>
       </div>
 
+      <!-- --------- Step Navigation --------- -->
       <div class="btn-row" style="margin-top: 20px;">
         <button class="btn-primary" onclick="prevStep(2)">Back</button>
         <button class="btn-primary" onclick="nextStep(2)">Next</button>
       </div>
     </div>
 
-    <!-- Step 3 -->
+    <!-- ============================ STEP 3: ANALYSIS TITLE ENTRY ============================ -->
     <div id="step3" class="form-step">
       <input type="text" id="analysisTitle" placeholder="Enter analysis title" />
       <div class="btn-row">
@@ -184,222 +286,254 @@
       </div>
     </div>
 
-    <!-- Final Step -->
+    <!-- ============================ STEP 4: SUCCESS MESSAGE ============================ -->
     <div id="summary" class="form-step">
-      <div class="success-message">✅ Analysis Saved Successfully!</div>
+      <div class="success-message">Analysis Saved Successfully</div>
       <div class="btn-row" style="justify-content: center; margin-top: 20px;">
         <button class="btn-primary" onclick="window.location.href='/dashboard'">Next</button>
       </div>
     </div>
   </div>
-
-  <script>
-    let step = 1;
-    const companies = [];
-    let selectedCompanyObjects = [];
-
-    function nextStep(current) {
-      document.getElementById(`step${current}`).classList.remove("active");
-      document.getElementById(`step${current + 1}`).classList.add("active");
-      document.getElementById(`step${current}Indicator`).classList.remove("active");
-      document.getElementById(`step${current + 1}Indicator`).classList.add("active");
-      if (current === 1) fetchLineItemsFromBackend();
-    }
-
-    function prevStep(current) {
-      document.getElementById(`step${current}`).classList.remove("active");
-      document.getElementById(`step${current - 1}`).classList.add("active");
-      document.getElementById(`step${current}Indicator`).classList.remove("active");
-      document.getElementById(`step${current - 1}Indicator`).classList.add("active");
-    }
-
-    function fetchCompanySuggestions() {
-      const input = document.getElementById("companyInput");
-      const query = input.value.trim();
-      const suggestionBox = document.getElementById("companySuggestions");
-      if (query.length < 1) return suggestionBox.style.display = "none";
-
-      fetch(`/api/search-companies?q=${query}`)
-        .then(res => res.json())
-        .then(data => {
-          suggestionBox.innerHTML = "";
-          if (!Array.isArray(data) || data.length === 0) return suggestionBox.style.display = "none";
-          data.forEach(company => {
-            const div = document.createElement("div");
-            div.textContent = company.name;
-            div.onclick = () => {
-              input.value = company.name;
-              input.dataset.companyId = company.companyid;
-              suggestionBox.innerHTML = "";
-              suggestionBox.style.display = "none";
-            };
-            suggestionBox.appendChild(div);
-          });
-          suggestionBox.style.display = "block";
-        });
-    }
-
-    function addCompany() {
-      const input = document.getElementById("companyInput");
-      const name = input.value.trim();
-      const id = input.dataset.companyId;
-      if (name && id && !companies.includes(name)) {
-        companies.push(name);
-        selectedCompanyObjects.push({ name, id });
-        updateList(companies, "selectedCompanies");
-        document.getElementById("nextBtn1").disabled = false;
-        localStorage.setItem("selectedCompanyObjects", JSON.stringify(selectedCompanyObjects));
-      }
-      input.value = "";
-      input.dataset.companyId = "";
-      document.getElementById("companySuggestions").style.display = "none";
-    }
-
-    function updateList(arr, elementId) {
-      const list = document.getElementById(elementId);
-      list.innerHTML = "";
-      arr.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = item;
-        list.appendChild(li);
-      });
-    }
-
-    function clearSelectedCompanies() {
-      localStorage.removeItem("selectedCompanyObjects");
-      companies.length = 0;
-      selectedCompanyObjects.length = 0;
-      updateList(companies, "selectedCompanies");
-      document.getElementById("nextBtn1").disabled = true;
-    }
-
-    function fetchLineItemsFromBackend() {
-      const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
-      const companyIds = stored.map(c => parseInt(c.id));
-      fetch("/api/get-line-items", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company_ids: companyIds })
-      })
-        .then(res => res.json())
-        .then(data => {
-          const container = document.getElementById("lineItemList");
-          container.innerHTML = "";
-          data.forEach(item => {
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.id = item.sli_id;
-            checkbox.value = item.name;
-            checkbox.name = "line_items";
-            checkbox.addEventListener("change", updateSelectedLineItemsPreview);
-
-            const label = document.createElement("label");
-            label.htmlFor = item.sli_id;
-            label.textContent = `${item.name} (${item.param})`;
-
-            const div = document.createElement("div");
-            div.appendChild(checkbox);
-            div.appendChild(label);
-            container.appendChild(div);
-          });
-
-          fetchPeriods();
-        });
-    }
-
-    function fetchPeriods() {
-      const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
-      const companyIds = stored.map(c => parseInt(c.id));
-      if (!companyIds.length) return;
-
-      const periodType = document.querySelector('input[name="periodType"]:checked').value;
-
-      fetch("/api/get-periods", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company_ids: companyIds, period_type: periodType })
-      })
-        .then(res => res.json())
-        .then(data => {
-          const fromSelect = document.getElementById("fromPeriod");
-          const toSelect = document.getElementById("toPeriod");
-          fromSelect.innerHTML = "";
-          toSelect.innerHTML = "";
-
-          data.forEach(period => {
-            const fromOpt = document.createElement("option");
-            fromOpt.value = fromOpt.textContent = period;
-            fromSelect.appendChild(fromOpt);
-
-            const toOpt = document.createElement("option");
-            toOpt.value = toOpt.textContent = period;
-            toSelect.appendChild(toOpt);
-          });
-        });
-    }
-
-    function updateSelectedLineItemsPreview() {
-      const checked = Array.from(document.querySelectorAll('input[name="line_items"]:checked')).map(cb => cb.value);
-      const previewList = document.getElementById("selectedLineItemPreview");
-      const countSpan = document.getElementById("selectedLineItemCount");
-      previewList.innerHTML = "";
-      checked.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = item;
-        previewList.appendChild(li);
-      });
-      countSpan.textContent = checked.length;
-    }
-
-    function saveAnalysis() {
-      const title = document.getElementById("analysisTitle").value.trim();
-      if (!title) return alert("Please enter analysis title");
-
-      const allTitles = JSON.parse(localStorage.getItem("savedAnalyses") || "[]");
-      if (allTitles.includes(title)) {
-        alert("An analysis with this name already exists. Please choose a different title.");
-        return;
-      }
-
-      const selectedLineItems = Array.from(document.querySelectorAll('input[name="line_items"]:checked')).map(cb => cb.value);
-      const fromPeriod = document.getElementById("fromPeriod").value;
-      const toPeriod = document.getElementById("toPeriod").value;
-
-      localStorage.setItem("analysisTitle", title);
-      localStorage.setItem("selectedCompanies", JSON.stringify(companies));
-      localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
-    
-      // Extract start and end year from FY-XXXX or CY-XXXX
-const startYear = parseInt(fromPeriod.split("-")[1]);
-const endYear = parseInt(toPeriod.split("-")[1]);
-const prefix = fromPeriod.split("-")[0]; // FY or CY
-
-// Generate all periods in range
-const selectedPeriods = [];
-for (let year = startYear; year <= endYear; year++) {
-  selectedPeriods.push(`${prefix}-${year}`);
-}
-
-localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
-
-      localStorage.setItem("savedAnalyses", JSON.stringify([...allTitles, title]));
-
-      document.getElementById("step3").classList.remove("active");
-      document.getElementById("step3Indicator").classList.remove("active");
-      document.getElementById("summary").classList.add("active");
-    }
-
-    window.onload = function () {
-      const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
-      if (stored.length > 0) {
-        selectedCompanyObjects = stored;
-        stored.forEach(c => {
-          companies.push(c.name);
-          updateList(companies, "selectedCompanies");
-        });
-        document.getElementById("nextBtn1").disabled = false;
-      }
-    };
-  </script>
 </body>
-</html>
+
+ <script>
+  // --------- Global Variables ---------
+  let step = 1;  // Tracks the current step
+  const companies = [];  // Stores selected company names
+  let selectedCompanyObjects = [];  // Stores selected company objects { name, id }
+
+  // --------- Step Navigation: Next ---------
+  function nextStep(current) {
+    // Hide current step and highlight next step
+    document.getElementById(`step${current}`).classList.remove("active");
+    document.getElementById(`step${current + 1}`).classList.add("active");
+    document.getElementById(`step${current}Indicator`).classList.remove("active");
+    document.getElementById(`step${current + 1}Indicator`).classList.add("active");
+
+    // On transition from step 1 to 2, fetch line items
+    if (current === 1) fetchLineItemsFromBackend();
+  }
+
+  // --------- Step Navigation: Back ---------
+  function prevStep(current) {
+    // Go back one step and update stepper UI
+    document.getElementById(`step${current}`).classList.remove("active");
+    document.getElementById(`step${current - 1}`).classList.add("active");
+    document.getElementById(`step${current}Indicator`).classList.remove("active");
+    document.getElementById(`step${current - 1}Indicator`).classList.add("active");
+  }
+
+  // --------- Fetch Company Suggestions (ElasticSearch) ---------
+  function fetchCompanySuggestions() {
+    const input = document.getElementById("companyInput");
+    const query = input.value.trim();
+    const suggestionBox = document.getElementById("companySuggestions");
+    if (query.length < 1) return suggestionBox.style.display = "none";  // Hide if no query
+
+    // Call backend API for suggestions
+    fetch(`/api/search-companies?q=${query}`)
+      .then(res => res.json())
+      .then(data => {
+        suggestionBox.innerHTML = "";
+        if (!Array.isArray(data) || data.length === 0) return suggestionBox.style.display = "none";
+
+        // Display all suggestions
+        data.forEach(company => {
+          const div = document.createElement("div");
+          div.textContent = company.name;
+          div.onclick = () => {
+            input.value = company.name;
+            input.dataset.companyId = company.companyid;
+            suggestionBox.innerHTML = "";
+            suggestionBox.style.display = "none";
+          };
+          suggestionBox.appendChild(div);
+        });
+        suggestionBox.style.display = "block";
+      });
+  }
+
+  // --------- Add Selected Company ---------
+  function addCompany() {
+    const input = document.getElementById("companyInput");
+    const name = input.value.trim();
+    const id = input.dataset.companyId;
+
+    // If valid and not already selected
+    if (name && id && !companies.includes(name)) {
+      companies.push(name);
+      selectedCompanyObjects.push({ name, id });
+      updateList(companies, "selectedCompanies");
+      document.getElementById("nextBtn1").disabled = false;
+
+      // Save to localStorage
+      localStorage.setItem("selectedCompanyObjects", JSON.stringify(selectedCompanyObjects));
+    }
+
+    // Reset input field and suggestion box
+    input.value = "";
+    input.dataset.companyId = "";
+    document.getElementById("companySuggestions").style.display = "none";
+  }
+
+  // --------- Update <ul> List with Items ---------
+  function updateList(arr, elementId) {
+    const list = document.getElementById(elementId);
+    list.innerHTML = "";
+    arr.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      list.appendChild(li);
+    });
+  }
+
+  // --------- Clear All Selected Companies ---------
+  function clearSelectedCompanies() {
+    localStorage.removeItem("selectedCompanyObjects");
+    companies.length = 0;
+    selectedCompanyObjects.length = 0;
+    updateList(companies, "selectedCompanies");
+    document.getElementById("nextBtn1").disabled = true;
+  }
+
+  // --------- Fetch Line Items Based on Selected Companies ---------
+  function fetchLineItemsFromBackend() {
+    const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
+    const companyIds = stored.map(c => parseInt(c.id));
+
+    // Call backend to get line items
+    fetch("/api/get-line-items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ company_ids: companyIds })
+    })
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("lineItemList");
+        container.innerHTML = "";
+
+        // Render each line item as a checkbox
+        data.forEach(item => {
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = item.sli_id;
+          checkbox.value = item.name;
+          checkbox.name = "line_items";
+          checkbox.addEventListener("change", updateSelectedLineItemsPreview);
+
+          const label = document.createElement("label");
+          label.htmlFor = item.sli_id;
+          label.textContent = `${item.name} (${item.param})`;
+
+          const div = document.createElement("div");
+          div.appendChild(checkbox);
+          div.appendChild(label);
+          container.appendChild(div);
+        });
+
+        fetchPeriods();  // Also fetch periods for next step
+      });
+  }
+
+  // --------- Fetch Periods (FY or CY) Based on Selected Companies ---------
+  function fetchPeriods() {
+    const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
+    const companyIds = stored.map(c => parseInt(c.id));
+    if (!companyIds.length) return;
+
+    const periodType = document.querySelector('input[name="periodType"]:checked').value;
+
+    // Call backend to get periods
+    fetch("/api/get-periods", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ company_ids: companyIds, period_type: periodType })
+    })
+      .then(res => res.json())
+      .then(data => {
+        const fromSelect = document.getElementById("fromPeriod");
+        const toSelect = document.getElementById("toPeriod");
+        fromSelect.innerHTML = "";
+        toSelect.innerHTML = "";
+
+        // Populate both dropdowns
+        data.forEach(period => {
+          const fromOpt = document.createElement("option");
+          fromOpt.value = fromOpt.textContent = period;
+          fromSelect.appendChild(fromOpt);
+
+          const toOpt = document.createElement("option");
+          toOpt.value = toOpt.textContent = period;
+          toSelect.appendChild(toOpt);
+        });
+      });
+  }
+
+  // --------- Update Line Item Preview (Selected Count + Names) ---------
+  function updateSelectedLineItemsPreview() {
+    const checked = Array.from(document.querySelectorAll('input[name="line_items"]:checked')).map(cb => cb.value);
+    const previewList = document.getElementById("selectedLineItemPreview");
+    const countSpan = document.getElementById("selectedLineItemCount");
+
+    previewList.innerHTML = "";
+    checked.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      previewList.appendChild(li);
+    });
+
+    countSpan.textContent = checked.length;
+  }
+
+  // --------- Save Analysis to localStorage ---------
+  function saveAnalysis() {
+    const title = document.getElementById("analysisTitle").value.trim();
+    if (!title) return alert("Please enter analysis title");
+
+    const allTitles = JSON.parse(localStorage.getItem("savedAnalyses") || "[]");
+    if (allTitles.includes(title)) {
+      alert("An analysis with this name already exists. Please choose a different title.");
+      return;
+    }
+
+    const selectedLineItems = Array.from(document.querySelectorAll('input[name="line_items"]:checked')).map(cb => cb.value);
+    const fromPeriod = document.getElementById("fromPeriod").value;
+    const toPeriod = document.getElementById("toPeriod").value;
+
+    // Save metadata to localStorage
+    localStorage.setItem("analysisTitle", title);
+    localStorage.setItem("selectedCompanies", JSON.stringify(companies));
+    localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
+
+    // --------- Generate Full Period Range ---------
+    const startYear = parseInt(fromPeriod.split("-")[1]);
+    const endYear = parseInt(toPeriod.split("-")[1]);
+    const prefix = fromPeriod.split("-")[0];  // e.g., FY or CY
+
+    const selectedPeriods = [];
+    for (let year = startYear; year <= endYear; year++) {
+      selectedPeriods.push(`${prefix}-${year}`);
+    }
+
+    localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
+    localStorage.setItem("savedAnalyses", JSON.stringify([...allTitles, title]));
+
+    // Move to success message step
+    document.getElementById("step3").classList.remove("active");
+    document.getElementById("step3Indicator").classList.remove("active");
+    document.getElementById("summary").classList.add("active");
+  }
+
+  // --------- Restore State on Page Reload (Pre-Fill Step 1) ---------
+  window.onload = function () {
+    const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
+    if (stored.length > 0) {
+      selectedCompanyObjects = stored;
+      stored.forEach(c => {
+        companies.push(c.name);
+        updateList(companies, "selectedCompanies");
+      });
+      document.getElementById("nextBtn1").disabled = false;
+    }
+  };
+</script>

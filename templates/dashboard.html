@@ -3,334 +3,1102 @@
 <head>
   <meta charset="UTF-8" />
   <title>Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+
+  <!-- Google Fonts - Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
   <style>
+    /* Global Body Styling */
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background-color: #f4f6fb;
+      background: linear-gradient(to right, #f0f4ff, #ffffff);
       display: flex;
       height: 100vh;
+      overflow: hidden;
+      transition: all 0.3s ease;
     }
+
+    /* Sidebar Section */
     .sidebar {
       width: 20%;
-      background-color: #ffffff;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+      background: rgba(255, 255, 255, 0.65); /* translucent background */
+      backdrop-filter: blur(12px);
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
       padding: 20px;
       box-sizing: border-box;
       height: 100vh;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
     }
+
+    /* Toggle Sidebar Button */
+    #toggleSidebarBtn {
+      position: fixed;
+      top: 20px;
+      left: 10px;
+      z-index: 9999;
+      padding: 6px 12px;
+      font-size: 11px;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    /* Common Button Styling */
+    .sidebar button,
+    .control-group button,
+    #toggleSidebarBtn {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: white;
+      border: none;
+      font-size: 11.5px;
+      font-weight: 500;
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    /* Button Hover Effect */
+    .sidebar button:hover,
+    .control-group button:hover,
+    #toggleSidebarBtn:hover {
+      background: linear-gradient(135deg, #1d4ed8, #4338ca);
+    }
+
+    /* Sidebar Title */
     .sidebar h3 {
-      font-size: 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
       margin-bottom: 10px;
     }
+
+    /* Sidebar List */
     .sidebar ul {
-      list-style-type: none;
-      padding-left: 0;
+      list-style: none;
+      padding: 0;
       font-size: 13px;
-      color: #333;
+      margin: 0;
     }
+
+    /* Sidebar List Items */
     .sidebar ul li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 6px 0;
-      border-bottom: 1px solid #f0f0f0;
-      cursor: pointer;
+      border-bottom: 1px solid #e5e7eb;
+      transition: all 0.2s ease;
     }
-    .create-btn {
-      width: 100%;
-      background-color: #2563eb;
-      border: none;
-      padding: 10px 12px;
-      color: white;
-      font-weight: 600;
-      border-radius: 6px;
-      font-size: 14px;
-      margin-bottom: 20px;
-      cursor: pointer;
+
+    /* Sidebar Item Hover Effect */
+    .sidebar ul li:hover {
+      background: #f1f5f9;
+      padding-left: 4px;
     }
+
+    /* Sidebar Delete Icon */
+    .sidebar ul li span:last-child {
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 10px;
+    }
+
+    /* Main Content Area */
     .main {
       width: 80%;
-      padding: 16px 40px 24px;
+      padding: 16px 30px;
       box-sizing: border-box;
       overflow-y: auto;
+      transition: all 0.3s ease;
     }
+
+    /* Dashboard Title */
     .title-box {
       background: linear-gradient(to right, #2563eb, #4f46e5);
       color: white;
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 20px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 15px;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Controls Bar Styling */
+    .controls-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      background: #ffffffdd;
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      margin-bottom: 18px;
+      overflow: visible;
+      position: relative;
+      z-index: 1;
+      font-size: 12px;
       width: 100%;
     }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-bottom: 30px;
-    }
+
+    /* Control Group Styling */
     .control-group {
-      flex: 1 1 200px;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      gap: 4px;
+      min-width: 110px;
+      max-width: none;
     }
+
+    /* Control Group Labels */
     .control-group label {
-      font-size: 14px;
-      margin-bottom: 4px;
-      display: block;
+      font-weight: 600;
+      color: #374151;
+      font-size: 12px;
     }
+
+    /* Control Inputs and Dropdowns */
     .control-group input,
     .control-group select {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-top: 6px;
+      font-size: 12px;
+      padding: 3px 5px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      height: 20px;
+      transition: border 0.2s ease;
     }
-    .control-group button {
-      margin-top: 6px;
-      width: 100%;
-      background-color: #2563eb;
-      border: none;
-      padding: 8px;
-      color: white;
-      font-weight: 600;
-      border-radius: 6px;
+
+    /* Input Focus Effects */
+    .control-group input:focus,
+    .control-group select:focus {
+      border-color: #2563eb;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    /* Radio Button Group */
+    .radio-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Radio Button Label Styling */
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+
+    /* Chips Preview Section */
+    #selectedPreview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 20px;
+    }
+
+    /* Company and Line Item Chips */
+    .chip,
+    .chip-lineitem {
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      border-radius: 20px;
+      gap: 6px;
+      border: 1px solid;
+      transition: all 0.2s ease;
+    }
+
+    /* Company Chip Color */
+    .chip {
+      background-color: #e0e7ff;
+      color: #1e3a8a;
+      border-color: #c7d2fe;
+    }
+
+    /* Line Item Chip Color */
+    .chip-lineitem {
+      background-color: #fef9c3;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+
+    /* Cross Icon Inside Chip */
+    .remove-btn {
       font-size: 13px;
       cursor: pointer;
+      transition: color 0.2s;
+      margin-left: 4px;
     }
-    .accordion {
-      background-color: #f9fafc;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      padding: 12px 18px;
-      font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
+
+    /* Cross Icon Hover Effect */
+    .remove-btn:hover {
+      color: #dc2626;
     }
-    .accordion::after {
-      content: '▼';
-      float: right;
-    }
-    .accordion.active::after {
-      content: '▲';
-    }
-    .panel {
+
+    /* Autocomplete Suggestions Dropdown */
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #cbd5e1;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 9999;
       display: none;
-      border: 1px solid #eee;
-      border-top: none;
-      border-radius: 0 0 8px 8px;
-      background-color: white;
-      padding: 10px 18px 18px;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+
+    /* Individual Suggestion Item */
+    .suggestions div {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 12px;
     }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 6px;
-      text-align: center;
-      font-size: 13px;
-    }
-    th {
+
+    /* Suggestion Hover */
+    .suggestions div:hover {
       background-color: #f1f5f9;
     }
+
+    /* When Sidebar is Hidden */
+    body.sidebar-hidden .sidebar {
+      display: none;
+    }
+
+    /* Expand Main When Sidebar Hidden */
+    body.sidebar-hidden .main {
+      width: 100%;
+    }
+
+    /* Line Item Section Styling */
+    #lineItemSection {
+      margin-top: 30px;
+    }
+
+    /* Accordion Header for Line Item */
+    .accordion {
+      background: #e5ecff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #1f2937;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      transition: background-color 0.3s ease;
+      margin-top: 24px;
+    }
+
+    /* Accordion Hover */
+    .accordion:hover {
+      background-color: #d7e2ff;
+    }
+
+    /* Hidden Panel by Default */
+    .panel {
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    /* Table Wrapper with Horizontal Scroll */
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 8px;
+      margin-bottom: 24px;
+      background-color: white;
+    }
+
+    /* Line Item Table Styling */
+    .line-item-table {
+      width: max-content;
+      min-width: 600px;
+      border-collapse: collapse;
+      font-size: 13px;
+      color: #1e1e1e;
+      border: 1px solid #ccc;
+      table-layout: auto;
+    }
+
+    /* Table Header and Cell Styling */
+    .line-item-table th,
+    .line-item-table td {
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    /* Header Styling */
+    .line-item-table th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    /* First Column (Row Headers) Styling */
+    .line-item-table td:first-child {
+      font-weight: 500;
+      color: #111827;
+    }
+
+    /* Alternating Row Background */
+    .line-item-table tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    /* Row Hover Highlight */
+    .line-item-table tr:hover {
+      background-color: #eef2f7;
+    }
+
+    /* Sticky First Column for Table */
+    .line-item-table th:first-child,
+    .line-item-table td:first-child {
+      position: sticky;
+      left: 0;
+      background-color: #ffffff;
+      z-index: 2;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+    }
+
+    /* Summary Row Style */
+    .line-item-table tr.summary-row {
+      background-color: #f3f4f6;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    /* Top Border for Summary Row */
+    .line-item-table tr.summary-row td {
+      border-top: 2px solid #e5e7eb;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #94a3b8;
+    }
+
+    /* Summary Row Cell Background */
+    .summary-row {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+
+    /* Grey First Column Styling */
+    td:first-child, th:first-child {
+      background-color: #f3f4f6;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
   </style>
 </head>
+
 <body>
+  <!-- Sidebar Toggle Button -->
+  <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
+
+  <!-- Sidebar Navigation -->
   <div class="sidebar">
-    <button class="create-btn" onclick="window.location.href='/new-analysis'">+ Create New Analysis</button>
-    <h3>Saved Analysis</h3>
+    <!-- Create New Analysis Button -->
+    <button onclick="window.location.href='/new-analysis'">+ Create New Analysis</button>
+
+    <!-- Saved Analysis Title -->
+    <h3 style="font-weight: 600; font-size: 12px; margin-bottom: 10px;">Saved Analysis</h3>
+
+    <!-- Saved Analysis List -->
     <ul id="savedAnalysisList"></ul>
+
+    <!-- Clear All Saved Analyses Button -->
+    <button onclick="clearAllSavedAnalyses()">Clear All</button>
   </div>
 
+  <!-- Main Content Area -->
   <div class="main">
+
+    <!-- Dashboard Title Heading -->
     <div class="title-box" id="analysisHeading">Dashboard</div>
-    <div class="controls">
+
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+
+      <!-- Company Selection Group -->
       <div class="control-group">
-        <label>Add Company</label>
-        <input type="text" id="addCompanyInput" placeholder="e.g. Apple" />
-        <button onclick="addCompany()">Add Company</button>
+        <label>Company</label>
+        <input type="text" id="addCompanyInput" placeholder="e.g. Apple" oninput="fetchCompanySuggestions()" autocomplete="off" />
+        <div id="companySuggestions" class="suggestions"></div>
+        <button onclick="addCompany()">Add</button>
       </div>
+
+      <!-- Line Item Selection Group -->
       <div class="control-group">
-        <label>Add Line Item</label>
-        <input type="text" id="addLineItemInput" placeholder="e.g. Revenue" />
-        <button onclick="addLineItem()">Add Line Item</button>
+        <label>Line Item</label>
+        <input type="text" id="addLineItemInput" placeholder="e.g. Revenue" onfocus="fetchLineItemSuggestions()" autocomplete="off" />
+        <div id="lineItemSuggestions" class="suggestions"></div>
+        <button onclick="addLineItem()">Add</button>
       </div>
-      <div class="control-group">
-        <label>Add Period</label>
-        <input type="text" id="addPeriodInput" placeholder="e.g. CY-2023" />
-        <button onclick="addPeriod()">Add Period</button>
+
+      <!-- Period Type Radio Group -->
+      <div class="control-group" style="margin-left: 36px; ">
+        <label>Period Type</label>
+        <div class="radio-group">
+          <label><input type="radio" name="periodType" value="FY" checked /> FY</label>
+          <label><input type="radio" name="periodType" value="CY" /> CY</label>
+        </div>
       </div>
+
+      <!-- From Year Input -->
       <div class="control-group">
-        <label>Change Currency</label>
-        <select id="currencySelector">
-          <option value="USD">$ - USD</option>
-          <option value="INR">₹ - INR</option>
-          <option value="EUR">€ - EUR</option>
-        </select>
+        <label>From</label>
+        <input type="number" id="fromYearInput" placeholder="e.g. 2020" oninput="updateSelectedPeriods()" />
+      </div>
+
+      <!-- To Year Input -->
+      <div class="control-group" style="margin-left: 12px;">
+        <label>To</label>
+        <input type="number" id="toYearInput" placeholder="e.g. 2024" oninput="updateSelectedPeriods()" />
       </div>
     </div>
+
+    <!-- Preview of Selected Companies and Line Items -->
+    <div id="selectedPreview" style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 20px;"></div>
+
+    <!-- Line Item Tables Section -->
     <div id="lineItemSection"></div>
   </div>
 
-  <script>
-    let selectedCompanies = JSON.parse(localStorage.getItem("selectedCompanies") || "[]");
-    let selectedLineItems = JSON.parse(localStorage.getItem("selectedLineItems") || "[]");
-    let selectedPeriods = JSON.parse(localStorage.getItem("selectedPeriods") || "[]");
-    let selectedCurrency = localStorage.getItem("selectedCurrency") || "USD";
 
-    const analysisTitle = localStorage.getItem("analysisTitle") || "Dashboard";
-    document.getElementById("analysisHeading").innerText = analysisTitle;
-    document.getElementById("currencySelector").value = selectedCurrency;
+<script>
+  // Load previously selected company objects from localStorage
+  let selectedCompanyObjects = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
 
-    const savedList = document.getElementById("savedAnalysisList");
-    const savedTitles = JSON.parse(localStorage.getItem("savedAnalyses") || "[]");
+  // Extract company names from objects or strings
+  let selectedCompanies = selectedCompanyObjects.map(c => typeof c === "string" ? c : c.name);
 
-    savedTitles.forEach(title => {
-      const li = document.createElement("li");
-      const span = document.createElement("span");
-      span.innerText = title;
-      span.style.cursor = "pointer";
-      span.onclick = () => {
-        localStorage.setItem("analysisTitle", title);
-        selectedCompanies = JSON.parse(localStorage.getItem("selectedCompanies") || "[]");
-        selectedLineItems = JSON.parse(localStorage.getItem("selectedLineItems") || "[]");
-        selectedPeriods = JSON.parse(localStorage.getItem("selectedPeriods") || "[]");
-        selectedCurrency = localStorage.getItem("selectedCurrency") || "USD";
-        document.getElementById("currencySelector").value = selectedCurrency;
-        document.getElementById("analysisHeading").innerText = title;
-        renderLineItems();
-      };
-      const deleteBtn = document.createElement("span");
-      deleteBtn.innerText = " ❌";
-      deleteBtn.style.color = "red";
-      deleteBtn.style.cursor = "pointer";
-      deleteBtn.style.marginLeft = "8px";
-      deleteBtn.onclick = () => {
-        const confirmDelete = confirm(`Are you sure you want to delete "${title}"?`);
-        if (confirmDelete) {
-          const updated = savedTitles.filter(t => t !== title);
-          localStorage.setItem("savedAnalyses", JSON.stringify(updated));
-          if (localStorage.getItem("analysisTitle") === title) {
-            localStorage.removeItem("selectedCompanies");
-            localStorage.removeItem("selectedLineItems");
-            localStorage.removeItem("selectedPeriods");
-            localStorage.removeItem("selectedCurrency");
-            localStorage.removeItem("analysisTitle");
-            location.reload();
-          } else {
-            li.remove();
+  // Load line items and periods from localStorage
+  let selectedLineItems = JSON.parse(localStorage.getItem("selectedLineItems") || "[]");
+  let selectedPeriods = JSON.parse(localStorage.getItem("selectedPeriods") || "[]");
+  console.log(selectedLineItems);
+
+  // Set the dashboard heading from analysis title
+  const analysisTitle = localStorage.getItem("analysisTitle") || "Dashboard";
+  document.getElementById("analysisHeading").innerText = analysisTitle;
+
+  // Load saved analysis titles and render them in sidebar
+  const savedList = document.getElementById("savedAnalysisList");
+  const savedTitles = JSON.parse(localStorage.getItem("savedAnalyses") || "[]");
+
+  savedTitles.forEach(title => {
+    const li = document.createElement("li");
+
+    // Title Span
+    const span = document.createElement("span");
+    span.innerText = title;
+    span.style.cursor = "pointer";
+
+    // Load analysis data when clicked
+    span.onclick = () => {
+      localStorage.setItem("analysisTitle", title);
+      selectedCompanies = JSON.parse(localStorage.getItem("selectedCompanies") || "[]");
+      selectedLineItems = JSON.parse(localStorage.getItem("selectedLineItems") || "[]");
+      selectedPeriods = JSON.parse(localStorage.getItem("selectedPeriods") || "[]");
+      selectedCurrency = localStorage.getItem("selectedCurrency") || "USD";
+      document.getElementById("currencySelector").value = selectedCurrency;
+      document.getElementById("analysisHeading").innerText = title;
+      renderLineItems();
+    };
+
+    // Delete Button
+    const deleteBtn = document.createElement("span");
+    deleteBtn.innerHTML = "&times;";
+    deleteBtn.style.color = "black";
+    deleteBtn.style.cursor = "pointer";
+    deleteBtn.style.marginLeft = "8px";
+
+    // Confirm delete action
+    deleteBtn.onclick = () => {
+      const confirmDelete = confirm(`Are you sure you want to delete "${title}"?`);
+      if (confirmDelete) {
+        const updated = savedTitles.filter(t => t !== title);
+        localStorage.setItem("savedAnalyses", JSON.stringify(updated));
+        if (localStorage.getItem("analysisTitle") === title) {
+          localStorage.removeItem("selectedCompanies");
+          localStorage.removeItem("selectedLineItems");
+          localStorage.removeItem("selectedPeriods");
+          localStorage.removeItem("analysisTitle");
+          location.reload();
+        } else {
+          li.remove();
+        }
+      }
+    };
+
+    // Append title and delete button
+    li.appendChild(span);
+    li.appendChild(deleteBtn);
+    savedList.appendChild(li);
+  });
+
+  // Fetch company IDs based on company names
+  async function getCompanyIdMap(companies) {
+    const idMap = {};
+    for (const c of companies) {
+      const name = typeof c === "string" ? c : c.name;
+      try {
+        const res = await fetch(`/api/search-companies?q=${encodeURIComponent(name)}`);
+        const data = await res.json();
+
+        if (Array.isArray(data)) {
+          const match = data.find(d => (d.name || "").toLowerCase() === name.toLowerCase());
+
+          if (match) {
+            idMap[name] = match.companyid || match.cid;
+          } else if (data.length > 0) {
+            idMap[name] = data[0].companyid || data[0].cid;
           }
         }
-      };
-      li.appendChild(span);
-      li.appendChild(deleteBtn);
-      savedList.appendChild(li);
-    });
+      } catch (err) {
+        console.error("Error in getCompanyIdMap:", err);
+      }
+    }
+    return idMap;
+  }
 
-    async function renderLineItems() {
-      const section = document.getElementById("lineItemSection");
-      section.innerHTML = "";
-      if (!selectedCompanies.length || !selectedLineItems.length || !selectedPeriods.length) return;
+  // Fetch periods from backend based on selected companies
+  async function fetchPeriodsDashboard() {
+    const companyIds = selectedCompanyObjects.map(c => parseInt(c.id || c.companyid || c.cid));
+    const periodType = document.querySelector('input[name="periodType"]:checked').value;
 
-      const res = await fetch('/api/batch-data', {
-        method: 'POST',
+    if (!companyIds.length) return;
+
+    try {
+      const res = await fetch("/api/get-periods", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companies: selectedCompanies,
-          line_items: selectedLineItems,
-          periods: selectedPeriods,
-          currency: selectedCurrency
-        })
+        body: JSON.stringify({ company_ids: companyIds, period_type: periodType })
       });
 
-      const data = await res.json();
+      const periods = await res.json();
 
-      selectedLineItems.forEach(item => {
-        const acc = document.createElement("div");
-        acc.className = "accordion";
-        acc.textContent = item;
-        const panel = document.createElement("div");
-        panel.className = "panel";
+      const fromDropdown = document.getElementById("fromPeriod");
+      const toDropdown = document.getElementById("toPeriod");
 
-        const table = document.createElement("table");
-        const thead = document.createElement("thead");
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<th>Company</th>` + selectedPeriods.map(p => `<th>${p}</th>`).join('');
-        thead.appendChild(tr);
-        table.appendChild(thead);
+      fromDropdown.innerHTML = '<option disabled selected>Select start year</option>';
+      toDropdown.innerHTML = '<option disabled selected>Select end year</option>';
 
-        const tbody = document.createElement("tbody");
-        selectedCompanies.forEach(company => {
-          const row = document.createElement("tr");
-          row.innerHTML = `<td>${company}</td>`;
-          selectedPeriods.forEach(period => {
-            const td = document.createElement("td");
-            td.textContent = (data?.[company]?.[item]?.[period]) || 'N/A';
-            row.appendChild(td);
-          });
-          tbody.appendChild(row);
-        });
+      // Populate dropdowns
+      periods.forEach(period => {
+        const opt1 = document.createElement("option");
+        opt1.value = opt1.textContent = period;
+        fromDropdown.appendChild(opt1);
 
-        table.appendChild(tbody);
-        panel.appendChild(table);
-        section.appendChild(acc);
-        section.appendChild(panel);
+        const opt2 = document.createElement("option");
+        opt2.value = opt2.textContent = period;
+        toDropdown.appendChild(opt2);
       });
 
-      document.querySelectorAll(".accordion").forEach(acc => {
-        acc.addEventListener("click", function () {
-          this.classList.toggle("active");
-          const panel = this.nextElementSibling;
-          panel.style.display = panel.style.display === "block" ? "none" : "block";
-        });
-      });
+      if (selectedPeriods.length > 0) {
+        fromDropdown.value = selectedPeriods[0];
+        toDropdown.value = selectedPeriods[selectedPeriods.length - 1];
+      }
+
+      updateSelectedPeriods();
+    } catch (err) {
+      console.error("Error fetching periods:", err);
+    }
+  }
+
+  // Generate period range array from year inputs
+  function updateSelectedPeriods() {
+    const prefix = document.querySelector('input[name="periodType"]:checked').value || "FY";
+    const from = parseInt(document.getElementById("fromYearInput").value);
+    const to = parseInt(document.getElementById("toYearInput").value);
+
+    if (isNaN(from) || isNaN(to) || from > to) return;
+
+    const newPeriods = [];
+    for (let y = from; y <= to; y++) {
+      newPeriods.push(`${prefix}-${y}`);
     }
 
+    selectedPeriods = newPeriods;
+    localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
     renderLineItems();
+  }
 
-    function addCompany() {
-      const input = document.getElementById("addCompanyInput");
-      const value = input.value.trim();
-      if (value && !selectedCompanies.includes(value)) {
-        selectedCompanies.push(value);
-        localStorage.setItem("selectedCompanies", JSON.stringify(selectedCompanies));
-        renderLineItems();
-        input.value = "";
-      }
-    }
+  // On page load
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchPeriodsDashboard();  // Load periods initially
+    renderSelectedPreview();  // Show chips for companies and line items
 
-    function addLineItem() {
-      const input = document.getElementById("addLineItemInput");
-      const value = input.value.trim();
-      if (value && !selectedLineItems.includes(value)) {
-        selectedLineItems.push(value);
-        localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
-        renderLineItems();
-        input.value = "";
-      }
-    }
+    // Refetch periods on FY/CY change
+    document.querySelectorAll("input[name='periodType']").forEach(radio =>
+      radio.addEventListener("change", fetchPeriodsDashboard)
+    );
+  });
 
-    function addPeriod() {
-      const input = document.getElementById("addPeriodInput");
-      const value = input.value.trim();
-      if (value && !selectedPeriods.includes(value)) {
-        selectedPeriods.push(value);
-        localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
-        renderLineItems();
-        input.value = "";
-      }
-    }
+  // Render tables for all selected line items and companies
+  async function renderLineItems() {
+    const section = document.getElementById("lineItemSection");
+    section.innerHTML = "";
 
-    document.getElementById("currencySelector").addEventListener("change", function () {
-      selectedCurrency = this.value;
-      localStorage.setItem("selectedCurrency", selectedCurrency);
-      renderLineItems();
+    if (!selectedCompanies.length || !selectedLineItems.length || !selectedPeriods.length) return;
+
+    const res = await fetch('/api/batch-data', {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        companies: selectedCompanies,
+        line_items: selectedLineItems,
+        periods: selectedPeriods,
+      })
     });
+
+    const data = await res.json();
+
+    selectedLineItems.forEach(item => {
+      const acc = document.createElement("div");
+      acc.className = "accordion";
+      acc.textContent = item;
+
+      const panel = document.createElement("div");
+      panel.className = "panel";
+
+      const table = document.createElement("table");
+      table.className = "line-item-table";
+
+      // Table Headers
+      const thead = document.createElement("thead");
+      const tr = document.createElement("tr");
+      const firstTh = document.createElement("th");
+      firstTh.textContent = "Company";
+      firstTh.style.backgroundColor = "#f3f4f6";
+      firstTh.style.fontWeight = "600";
+      firstTh.style.color = "#1e293b";
+      tr.appendChild(firstTh);
+
+      selectedPeriods.forEach(p => {
+        const th = document.createElement("th");
+        th.textContent = p;
+        th.className = "table-header";
+        tr.appendChild(th);
+      });
+
+      thead.appendChild(tr);
+      table.appendChild(thead);
+
+      // Table Body Rows
+      const tbody = document.createElement("tbody");
+      selectedCompanies.forEach(company => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${company}</td>`;
+        selectedPeriods.forEach(period => {
+          const td = document.createElement("td");
+          const rawValue = Number(data?.[company]?.[item]?.[period]);
+
+          td.textContent = isNaN(rawValue)
+            ? 'N/A'
+            : `$${(rawValue / 1_000_000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+          row.appendChild(td);
+        });
+        tbody.appendChild(row);
+      });
+
+      // Average Row
+      const avgRow = document.createElement("tr");
+      avgRow.classList.add("summary-row");
+      const avgLabel = document.createElement("td");
+      avgLabel.textContent = "Average";
+      avgLabel.style.fontWeight = "600";
+      avgLabel.style.backgroundColor = "#f3f4f6";
+      avgRow.appendChild(avgLabel);
+
+      selectedPeriods.forEach(period => {
+        let sum = 0, count = 0;
+        selectedCompanies.forEach(company => {
+          const val = Number(data?.[company]?.[item]?.[period]);
+          if (!isNaN(val)) {
+            sum += val;
+            count++;
+          }
+        });
+        const avg = count ? (sum / count) : NaN;
+
+        const td = document.createElement("td");
+        td.textContent = isNaN(avg)
+          ? 'N/A'
+          : `$${(avg / 1_000_000).toLocaleString(undefined, { minimumFractionDigits: 3 })}`;
+        td.style.fontWeight = "600";
+        avgRow.appendChild(td);
+      });
+      tbody.appendChild(avgRow);
+
+      // Total Row
+      const totalRow = document.createElement("tr");
+      totalRow.classList.add("summary-row");
+      const totalLabel = document.createElement("td");
+      totalLabel.textContent = "Total";
+      totalLabel.style.fontWeight = "600";
+      totalLabel.style.backgroundColor = "#f3f4f6";
+      totalRow.appendChild(totalLabel);
+
+      selectedPeriods.forEach(period => {
+        let sum = 0;
+        selectedCompanies.forEach(company => {
+          const val = Number(data?.[company]?.[item]?.[period]);
+          if (!isNaN(val)) sum += val;
+        });
+
+        const td = document.createElement("td");
+        td.textContent = isNaN(sum)
+          ? 'N/A'
+          : `$${(sum / 1_000_000).toLocaleString(undefined, { minimumFractionDigits: 3 })}`;
+        td.style.fontWeight = "600";
+        totalRow.appendChild(td);
+      });
+      tbody.appendChild(totalRow);
+
+      // Company Count Row
+      const countRow = document.createElement("tr");
+      countRow.classList.add("summary-row");
+      const countLabel = document.createElement("td");
+      countLabel.textContent = "Companies";
+      countLabel.style.fontWeight = "600";
+      countLabel.style.backgroundColor = "#f3f4f6";
+      countRow.appendChild(countLabel);
+
+      selectedPeriods.forEach(() => {
+        const td = document.createElement("td");
+        td.textContent = selectedCompanies.length;
+        td.style.fontWeight = "600";
+        countRow.appendChild(td);
+      });
+      tbody.appendChild(countRow);
+
+      table.appendChild(tbody);
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-wrapper";
+      wrapper.appendChild(table);
+      panel.appendChild(wrapper);
+
+      section.appendChild(acc);
+      section.appendChild(panel);
+    });
+
+    // Accordion toggle logic
+    document.querySelectorAll(".accordion").forEach(acc => {
+      acc.addEventListener("click", function () {
+        this.classList.toggle("active");
+        const panel = this.nextElementSibling;
+        panel.style.display = panel.style.display === "block" ? "none" : "block";
+      });
+    });
+  }
+
+  // Load initial line items
+  renderLineItems();
+
+
+function addCompany() {
+  // Get company name and ID from input
+  const input = document.getElementById("addCompanyInput");
+  const value = input.value.trim();
+  const id = input.dataset.companyId;
+
+  // Ignore empty input or missing ID
+  if (!value || !id) return;
+
+  // If company is not already selected
+  if (!selectedCompanies.includes(value)) {
+    selectedCompanies.push(value);
+    selectedCompanyObjects.push({ name: value, id: parseInt(id) });
+
+    // Save updated list in localStorage
+    localStorage.setItem("selectedCompanies", JSON.stringify(selectedCompanies));
+    localStorage.setItem("selectedCompanyObjects", JSON.stringify(selectedCompanyObjects));
+
+    // Rerender data and chips
+    renderLineItems();
+    renderSelectedPreview();
+  }
+
+  // Clear input fields
+  input.value = "";
+  input.dataset.companyId = "";
+  input.dataset.companyName = "";
+}
+
+function fetchCompanySuggestions() {
+  // Input and suggestion container
+  const input = document.getElementById("addCompanyInput");
+  const query = input.value.trim();
+  const suggestionBox = document.getElementById("companySuggestions");
+
+  // Hide suggestions if input is empty
+  if (query.length < 1) {
+    suggestionBox.style.display = "none";
+    return;
+  }
+
+  // Fetch suggestions from backend
+  fetch(`/api/search-companies?q=${query}`)
+    .then(res => res.json())
+    .then(data => {
+      suggestionBox.innerHTML = ""; // Clear old suggestions
+      if (Array.isArray(data) && data.length > 0) {
+        data.forEach(company => {
+          const div = document.createElement("div");
+          div.textContent = company.name;
+
+          // On click: populate input and set ID
+          div.onclick = () => {
+            input.value = company.name;
+            input.dataset.companyId = company.companyid || company.cid;
+            input.dataset.companyName = company.name;
+            suggestionBox.style.display = "none";
+          };
+
+          suggestionBox.appendChild(div);
+        });
+        suggestionBox.style.display = "block"; // Show dropdown
+      } else {
+        suggestionBox.style.display = "none"; // Hide if no results
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching company suggestions:", error);
+      suggestionBox.style.display = "none";
+    });
+}
+
+function addLineItem() {
+  // Add selected line item name to localStorage
+  const input = document.getElementById("addLineItemInput");
+  const name = input.value.trim();
+
+  if (!name) return;
+
+  if (!selectedLineItems.includes(name)) {
+    selectedLineItems.push(name); // Add as string
+    localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
+    renderLineItems();
+    renderSelectedPreview(); 
+  }
+
+  input.value = "";
+  input.dataset.sliId = "";
+}
+
+function renderSelectedPreview() {
+  // Renders all selected companies and line items as chips
+  const preview = document.getElementById("selectedPreview");
+  preview.innerHTML = '';
+
+  // Company Chips
+  selectedCompanyObjects.forEach((company, index) => {
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.innerHTML = `${company.name} <span class="remove-btn">❌</span>`;
+
+    // Remove company on ❌ click
+    chip.querySelector(".remove-btn").onclick = () => {
+      selectedCompanyObjects.splice(index, 1);
+      selectedCompanies = selectedCompanyObjects.map(obj => obj.name);
+      localStorage.setItem("selectedCompanyObjects", JSON.stringify(selectedCompanyObjects));
+      localStorage.setItem("selectedCompanies", JSON.stringify(selectedCompanies));
+      renderSelectedPreview();
+      renderLineItems();
+    };
+    preview.appendChild(chip);
+  });
+
+  // Line Item Chips
+  selectedLineItems.forEach((item, index) => {
+    const chip = document.createElement("div");
+    chip.className = "chip-lineitem";
+    chip.innerHTML = `${item} <span class="remove-btn">❌</span>`;
+
+    // Remove line item on ❌ click
+    chip.querySelector(".remove-btn").onclick = () => {
+      selectedLineItems.splice(index, 1);
+      localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
+      renderSelectedPreview();
+      renderLineItems();
+    };
+    preview.appendChild(chip);
+  });
+}
+
+async function fetchLineItemSuggestions() {
+  // Suggestion input and box
+  const input = document.getElementById("addLineItemInput");
+  const suggestionBox = document.getElementById("lineItemSuggestions");
+
+  // Do nothing if no companies selected
+  if (!selectedCompanyObjects || selectedCompanyObjects.length === 0) {
+    suggestionBox.style.display = "none";
+    return;
+  }
+
+  suggestionBox.innerHTML = "<div>Loading...</div>";
+  suggestionBox.style.display = "block";
+
+  try {
+    // Extract company IDs
+    const companyIds = selectedCompanyObjects.map(c => parseInt(c.id || c.companyid || c.cid));
+
+    // Fetch line items for selected companies
+    const res = await fetch('/api/get-line-items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ company_ids: companyIds })
+    });
+
+    const data = await res.json();
+    suggestionBox.innerHTML = "";
+
+    if (Array.isArray(data) && data.length > 0) {
+      data.forEach(item => {
+        const name = item.name || item;
+        const sliId = item.UniqueSliId || item.id || item.sli_id;
+
+        // Skip if data incomplete
+        if (!name || !sliId) return;
+
+        const div = document.createElement("div");
+        div.textContent = name;
+
+        // Set input value on click
+        div.onclick = () => {
+          input.value = name;
+          suggestionBox.style.display = "none";
+        };
+
+        suggestionBox.appendChild(div);
+      });
+    } else {
+      suggestionBox.innerHTML = "<div>No line items available</div>";
+    }
+
+  } catch (error) {
+    console.error("Error fetching suggestions:", error);
+    suggestionBox.innerHTML = "<div>Error fetching suggestions</div>";
+  }
+}
+
+function addPeriod() {
+  // Adds a manual period (used rarely)
+  const input = document.getElementById("addPeriodInput");
+  const value = input.value.trim();
+
+  if (value && !selectedPeriods.includes(value)) {
+    selectedPeriods.push(value);
+    localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
+    renderLineItems();
+    input.value = "";
+  }
+}
+
+function toggleSidebar() {
+  // Toggle visibility of the sidebar
+  document.body.classList.toggle('sidebar-hidden');
+}
+
+// Hide suggestions on outside click
+document.addEventListener("click", function (e) {
+  const companyBox = document.getElementById("companySuggestions");
+  const companyInput = document.getElementById("addCompanyInput");
+
+  if (!companyBox.contains(e.target) && !companyInput.contains(e.target)) {
+    companyBox.style.display = "none";
+  }
+
+  const lineBox = document.getElementById("lineItemSuggestions");
+  const lineInput = document.getElementById("addLineItemInput");
+
+  if (!lineBox.contains(e.target) && !lineInput.contains(e.target)) {
+    lineBox.style.display = "none";
+  }
+});
+
+function clearAllSavedAnalyses() {
+  // Clears all saved dashboard data
+  const confirmClear = confirm("Are you sure you want to clear all saved analyses?");
+  if (confirmClear) {
+    localStorage.removeItem("savedAnalyses");
+    localStorage.removeItem("analysisTitle");
+    localStorage.removeItem("selectedCompanies");
+    localStorage.removeItem("selectedLineItems");
+    localStorage.removeItem("selectedPeriods");
+    localStorage.removeItem("selectedCurrency");
+    location.reload();
+  }
+}
+
+// Hide line item suggestions after blur delay
+document.getElementById("addLineItemInput").addEventListener("blur", function () {
+  setTimeout(() => {
+    document.getElementById("lineItemSuggestions").style.display = "none";
+  }, 150);
+});
+
+// Duplicate toggleSidebar definition (optional cleanup)
+function toggleSidebar() {
+  document.body.classList.toggle('sidebar-hidden');
+}
+
+// Close suggestions if user clicks outside input/suggestion box (duplicate safeguard)
+document.addEventListener("click", function (e) {
+  const companyBox = document.getElementById("companySuggestions");
+  const companyInput = document.getElementById("addCompanyInput");
+  if (companyBox && companyInput && !companyBox.contains(e.target) && !companyInput.contains(e.target)) {
+    companyBox.style.display = "none";
+  }
+
+  const lineBox = document.getElementById("lineItemSuggestions");
+  const lineInput = document.getElementById("addLineItemInput");
+  if (lineBox && lineInput && !lineBox.contains(e.target) && !lineInput.contains(e.target)) {
+    lineBox.style.display = "none";
+  }
+});
+
+
+
   </script>
 </body>
 </html>
