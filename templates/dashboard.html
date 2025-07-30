@@ -205,53 +205,57 @@
     }
 
     /* Chips Preview Section */
-    #selectedPreview {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 10px 0 20px;
-    }
+#selectedPreview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 20px;
+}
 
-    /* Company and Line Item Chips */
-    .chip,
-    .chip-lineitem {
-      display: flex;
-      align-items: center;
-      padding: 4px 10px;
-      font-size: 11.5px;
-      border-radius: 20px;
-      gap: 6px;
-      border: 1px solid;
-      transition: all 0.2s ease;
-    }
+/* Company and Line Item Chips */
+.chip,
+.chip-lineitem {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-radius: 20px;
+  gap: 6px;
+  border: 1px solid;
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
 
-    /* Company Chip Color */
-    .chip {
-      background-color: #e0e7ff;
-      color: #1e3a8a;
-      border-color: #c7d2fe;
-    }
+/* Company Chip Color */
+.chip {
+  background-color: #e0e7ff;
+  color: #1e3a8a;
+  border-color: #c7d2fe;
+}
 
-    /* Line Item Chip Color */
-    .chip-lineitem {
-      background-color: #fef9c3;
-      color: #92400e;
-      border-color: #fde68a;
-    }
+/* Line Item Chip Color */
+.chip-lineitem {
+  background-color: #fef9c3;
+  color: #92400e;
+  border-color: #fde68a;
+}
 
-    /* Cross Icon Inside Chip */
-    .remove-btn {
-      font-size: 13px;
-      cursor: pointer;
-      transition: color 0.2s;
-      margin-left: 4px;
-    }
+/* Cross Icon Inside Chip */
+.remove-btn {
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+  margin-left: 4px;
+  color: #64748b;
+}
 
-    /* Cross Icon Hover Effect */
-    .remove-btn:hover {
-      color: #dc2626;
-    }
-
+/* Cross Icon Hover Effect */
+.remove-btn:hover {
+  color: #dc2626;
+  transform: scale(1.1);
+}
     /* Autocomplete Suggestions Dropdown */
     .suggestions {
       position: absolute;
@@ -326,6 +330,8 @@
       margin-top: 8px;
       margin-bottom: 24px;
       background-color: white;
+      position: relative;   
+      z-index: 0;   
     }
 
     /* Line Item Table Styling */
@@ -377,7 +383,7 @@
       position: sticky;
       left: 0;
       background-color: #ffffff;
-      z-index: 2;
+      z-index: 1;
       box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
       border-left: 1px solid #ccc;
       border-right: 1px solid #ccc;
@@ -394,10 +400,25 @@
     .line-item-table tr.summary-row td {
       border-top: 2px solid #e5e7eb;
     }
+        .summary-row td {
+      font-size: 11px;
+      padding: 2px 6px;
+      line-height: 1.0;
+    }
+
+    .line-item-table th,
+    .line-item-table td {
+      text-align: right;
+      padding: 6px 10px;
+    }
+    .line-item-table th:first-child,
+    .line-item-table td:first-child {
+      text-align: left;  /* Keep company names left-aligned */
+    }
 
     /* Scrollbar Styling */
     ::-webkit-scrollbar {
-      height: 8px;
+      height: 6px;
     }
 
     ::-webkit-scrollbar-track {
@@ -412,11 +433,33 @@
     ::-webkit-scrollbar-thumb:hover {
       background-color: #94a3b8;
     }
+    /* Thin scrollbar for dropdown suggestions */
+#companySuggestions::-webkit-scrollbar,
+#lineItemSuggestions::-webkit-scrollbar {
+  width: 6px;  /* narrow vertical scrollbar */
+}
+
+#companySuggestions::-webkit-scrollbar-track,
+#lineItemSuggestions::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#companySuggestions::-webkit-scrollbar-thumb,
+#lineItemSuggestions::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+#companySuggestions::-webkit-scrollbar-thumb:hover,
+#lineItemSuggestions::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
 
     /* Summary Row Cell Background */
     .summary-row {
-      background-color: #f3f4f6;
-      font-weight: 600;
+      font-size: 12px !important;
+      opacity: 0.7;
+      background-color: #f9fafb;
     }
 
     /* Grey First Column Styling */
@@ -425,8 +468,39 @@
       font-weight: 600;
       color: #1e293b;
     }
+    .chartCanvas {
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    max-width: 100%;
+  }
+  .chartCanvas.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  }
+#lineItemSuggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border: 1px solid #ccc;
+  z-index: 9999;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+
 
   </style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  
+
 </head>
 
 <body>
@@ -458,7 +532,9 @@
     <div class="controls-bar">
 
       <!-- Company Selection Group -->
-      <div class="control-group">
+      <!-- Company Selection Group -->
+      <div class="control-group" style="position: relative;">
+
         <label>Company</label>
         <input type="text" id="addCompanyInput" placeholder="e.g. Apple" oninput="fetchCompanySuggestions()" autocomplete="off" />
         <div id="companySuggestions" class="suggestions"></div>
@@ -466,7 +542,9 @@
       </div>
 
       <!-- Line Item Selection Group -->
-      <div class="control-group">
+      <!-- Line Item Selection Group -->
+      <div class="control-group" style="position: relative;">
+
         <label>Line Item</label>
         <input type="text" id="addLineItemInput" placeholder="e.g. Revenue" onfocus="fetchLineItemSuggestions()" autocomplete="off" />
         <div id="lineItemSuggestions" class="suggestions"></div>
@@ -501,6 +579,28 @@
     <!-- Line Item Tables Section -->
     <div id="lineItemSection"></div>
   </div>
+    <!-- Loading Spinner Overlay -->
+  <!-- Small Loading Badge -->
+  <!-- Centered Small Loading Badge -->
+  <div id="loadingOverlay" style="
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #e0e7ff;
+    color: #1e3a8a;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    display: none;
+  ">
+    ⏳ Fetching data...
+  </div>
+
+
 
 
 <script>
@@ -532,16 +632,29 @@
     span.style.cursor = "pointer";
 
     // Load analysis data when clicked
-    span.onclick = () => {
-      localStorage.setItem("analysisTitle", title);
-      selectedCompanies = JSON.parse(localStorage.getItem("selectedCompanies") || "[]");
-      selectedLineItems = JSON.parse(localStorage.getItem("selectedLineItems") || "[]");
-      selectedPeriods = JSON.parse(localStorage.getItem("selectedPeriods") || "[]");
-      selectedCurrency = localStorage.getItem("selectedCurrency") || "USD";
-      document.getElementById("currencySelector").value = selectedCurrency;
-      document.getElementById("analysisHeading").innerText = title;
-      renderLineItems();
-    };
+   span.onclick = () => {
+    console.log("Clicked analysis:", title);
+  const savedData = JSON.parse(localStorage.getItem(`analysis_${title}`) || "{}");
+
+  if (Object.keys(savedData).length === 0) {
+    alert("No saved data found for this analysis.");
+    return;
+  }
+
+  localStorage.setItem("analysisTitle", title);
+  localStorage.setItem("selectedCompanies", JSON.stringify(savedData.selectedCompanies || []));
+  localStorage.setItem("selectedLineItems", JSON.stringify(savedData.selectedLineItems || []));
+  localStorage.setItem("selectedPeriods", JSON.stringify(savedData.selectedPeriods || []));
+  localStorage.setItem("selectedCompanyObjects", JSON.stringify(savedData.selectedCompanyObjects || []));
+ 
+
+ 
+  document.getElementById("analysisHeading").innerText = title;
+
+  location.reload();
+};
+
+
 
     // Delete Button
     const deleteBtn = document.createElement("span");
@@ -674,6 +787,9 @@
 
   // Render tables for all selected line items and companies
   async function renderLineItems() {
+  document.getElementById("loadingOverlay").style.display = "flex";  // Show loading
+    selectedLineItems = [...new Set(selectedLineItems)];
+
     const section = document.getElementById("lineItemSection");
     section.innerHTML = "";
 
@@ -694,7 +810,11 @@
     selectedLineItems.forEach(item => {
       const acc = document.createElement("div");
       acc.className = "accordion";
-      acc.textContent = item;
+      acc.innerHTML = `
+     <span class="accordion-title">${item}</span>
+     <span class="accordion-graph-btn" onclick="toggleChartView(event,this)">📈</span>
+`;
+
 
       const panel = document.createElement("div");
       panel.className = "panel";
@@ -816,6 +936,22 @@
       wrapper.appendChild(table);
       panel.appendChild(wrapper);
 
+
+      const canvas = document.createElement("canvas");
+      canvas.className = "chartCanvas";
+      canvas.width = 80 * selectedPeriods.length;
+
+
+
+      const chartWrapper = document.createElement("div");
+      chartWrapper.style.overflowX = "auto";
+      chartWrapper.style.padding = "10px 0";
+      chartWrapper.appendChild(canvas);
+      panel.appendChild(chartWrapper);
+
+
+
+
       section.appendChild(acc);
       section.appendChild(panel);
     });
@@ -828,11 +964,26 @@
         panel.style.display = panel.style.display === "block" ? "none" : "block";
       });
     });
+    document.getElementById("loadingOverlay").style.display = "none";  // Hide loading when done
   }
 
   // Load initial line items
   renderLineItems();
 
+function updateSavedAnalysis() {
+  const title = localStorage.getItem("analysisTitle");
+  if (!title) return;
+
+  const currentSave = {
+    selectedCompanies: JSON.parse(localStorage.getItem("selectedCompanies") || "[]"),
+    selectedCompanyObjects: JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]"),
+    selectedLineItems: JSON.parse(localStorage.getItem("selectedLineItems") || "[]"),
+    selectedPeriods: JSON.parse(localStorage.getItem("selectedPeriods") || "[]"),
+    selectedCurrency: localStorage.getItem("selectedCurrency") || "USD"
+  };
+
+  localStorage.setItem(`analysis_${title}`, JSON.stringify(currentSave));
+}
 
 function addCompany() {
   // Get company name and ID from input
@@ -854,7 +1005,10 @@ function addCompany() {
 
     // Rerender data and chips
     renderLineItems();
+    updateSavedAnalysis();
     renderSelectedPreview();
+    
+
   }
 
   // Clear input fields
@@ -918,6 +1072,7 @@ function addLineItem() {
     localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
     renderLineItems();
     renderSelectedPreview(); 
+    updateSavedAnalysis();
   }
 
   input.value = "";
@@ -1021,6 +1176,7 @@ async function fetchLineItemSuggestions() {
   }
 }
 
+
 function addPeriod() {
   // Adds a manual period (used rarely)
   const input = document.getElementById("addPeriodInput");
@@ -1029,7 +1185,11 @@ function addPeriod() {
   if (value && !selectedPeriods.includes(value)) {
     selectedPeriods.push(value);
     localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
+    updateSavedAnalysis();
     renderLineItems();
+    updateSavedAnalysis();
+ 
+
     input.value = "";
   }
 }
@@ -1055,6 +1215,77 @@ document.addEventListener("click", function (e) {
     lineBox.style.display = "none";
   }
 });
+function toggleChartView(event, iconElement) {
+  event.stopPropagation(); // Prevent accordion toggle
+
+  const accordion = iconElement.closest(".accordion");
+  const panel = accordion.nextElementSibling;
+  const table = panel.querySelector("table");
+  const canvas = panel.querySelector("canvas.chartCanvas");
+
+  // If chart already shown → hide it with animation
+  if (canvas.classList.contains("active")) {
+    canvas.classList.remove("active");
+    setTimeout(() => {
+      canvas.style.display = "none";
+      table.style.display = "table";
+    }, 400); // match transition duration
+    return;
+  }
+
+  // Else: show chart
+  canvas.style.display = "block";
+  setTimeout(() => canvas.classList.add("active"), 10); // smooth entrance
+  table.style.display = "none";
+
+  // Chart creation
+  const labels = [...table.querySelectorAll("thead th")]
+    .slice(1)
+    .map(th => th.textContent);
+
+  const datasets = [];
+  const rows = table.querySelectorAll("tbody tr");
+  for (let i = 0; i < rows.length - 3; i++) {
+    const cells = rows[i].querySelectorAll("td");
+    const company = cells[0].textContent;
+    const values = [];
+
+    for (let j = 1; j < cells.length; j++) {
+      const num = parseFloat(cells[j].textContent.replace(/[^0-9.\-]/g, ''));
+      values.push(isNaN(num) ? null : num);
+    }
+
+    datasets.push({
+      label: company,
+      data: values,
+      fill: false,
+      tension: 0.3,
+      borderWidth: 2
+    });
+  }
+
+  new Chart(canvas.getContext("2d"), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: ctx => `$${ctx.parsed.y.toFixed(2)}M`
+          }
+        }
+      },
+      scales: {
+        y: { title: { display: true, text: 'Value (Millions)' } },
+        x: { title: { display: true, text: 'Period' } }
+      }
+    }
+  });
+}
+
+
 
 function clearAllSavedAnalyses() {
   // Clears all saved dashboard data
@@ -1066,6 +1297,10 @@ function clearAllSavedAnalyses() {
     localStorage.removeItem("selectedLineItems");
     localStorage.removeItem("selectedPeriods");
     localStorage.removeItem("selectedCurrency");
+
+    renderSelectedPreview();  // ✅ show updated company and line item chips
+    renderLineItems();        // ✅ re-render the data tables
+
     location.reload();
   }
 }

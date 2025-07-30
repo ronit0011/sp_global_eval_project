@@ -33,8 +33,6 @@ def new_analysis():
 def dashboard():
     return render_template('dashboard.html')  # Main dashboard view with result tables
 
-
-
 # --------- API: Company Search (Elasticsearch) ---------
 @app.route('/api/search-companies')
 def search_companies():
@@ -69,8 +67,6 @@ def search_companies():
     except Exception as e:
         return jsonify([])  # Fail silently with empty list
 
-
-
 # --------- API: Line Items by Company IDs ---------
 @app.route('/api/get-line-items', methods=['POST'])
 def get_line_items_for_companies():
@@ -104,8 +100,6 @@ def get_line_items_for_companies():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Return error if failed
 
-
-
 # --------- API: Periods for Selected Companies ---------
 @app.route('/api/get-periods', methods=['POST'])
 def get_periods():
@@ -132,8 +126,6 @@ def get_periods():
         return jsonify(sorted_periods)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
 
 # --------- API: Batch Financial Data Retrieval ---------
 @app.route('/api/batch-data', methods=['POST'])
@@ -224,8 +216,6 @@ def batch_data():
         import traceback
         traceback.print_exc()  # Print full traceback in console
         return jsonify({"error": str(e)})
-
-
 
 # --------- Main Entry Point ---------
 if __name__ == "__main__":

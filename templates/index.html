@@ -303,16 +303,42 @@
   let selectedCompanyObjects = [];  // Stores selected company objects { name, id }
 
   // --------- Step Navigation: Next ---------
-  function nextStep(current) {
-    // Hide current step and highlight next step
-    document.getElementById(`step${current}`).classList.remove("active");
-    document.getElementById(`step${current + 1}`).classList.add("active");
-    document.getElementById(`step${current}Indicator`).classList.remove("active");
-    document.getElementById(`step${current + 1}Indicator`).classList.add("active");
+function nextStep(current) {
+  // ✅ Step 2 → Step 3 validation
+  if (current === 2) {
+    const fromPeriod = document.getElementById("fromPeriod").value;
+    const toPeriod = document.getElementById("toPeriod").value;
 
-    // On transition from step 1 to 2, fetch line items
-    if (current === 1) fetchLineItemsFromBackend();
+    if (!fromPeriod || !toPeriod) {
+      alert("Please select both 'From' and 'To' periods.");
+      return;
+    }
+
+    const fromYear = parseInt(fromPeriod.split("-")[1]);
+    const toYear = parseInt(toPeriod.split("-")[1]);
+
+    if (fromYear > toYear) {
+      alert("Invalid period range: 'From' year must be earlier than or equal to 'To' year.");
+      return;
+    }
+
+    const checkedLineItems = document.querySelectorAll('input[name="line_items"]:checked');
+    if (checkedLineItems.length === 0) {
+      alert("Please select at least one line item before proceeding.");
+      return;
+    }
   }
+
+  // ✅ Proceed to next step
+  document.getElementById(`step${current}`).classList.remove("active");
+  document.getElementById(`step${current + 1}`).classList.add("active");
+  document.getElementById(`step${current}Indicator`).classList.remove("active");
+  document.getElementById(`step${current + 1}Indicator`).classList.add("active");
+
+  // ✅ If coming from Step 1 → Step 2, fetch line items
+  if (current === 1) fetchLineItemsFromBackend();
+}
+
 
   // --------- Step Navigation: Back ---------
   function prevStep(current) {
@@ -401,7 +427,6 @@
     const stored = JSON.parse(localStorage.getItem("selectedCompanyObjects") || "[]");
     const companyIds = stored.map(c => parseInt(c.id));
 
-    // Call backend to get line items
     fetch("/api/get-line-items", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -412,7 +437,6 @@
         const container = document.getElementById("lineItemList");
         container.innerHTML = "";
 
-        // Render each line item as a checkbox
         data.forEach(item => {
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
@@ -423,7 +447,13 @@
 
           const label = document.createElement("label");
           label.htmlFor = item.sli_id;
-          label.textContent = `${item.name} (${item.param})`;
+
+          // ✅ Only show param if it's not "none"
+          if (item.param && item.param.toLowerCase() !== "none") {
+            label.textContent = `${item.name} (${item.param})`;
+          } else {
+            label.textContent = item.name;
+          }
 
           const div = document.createElement("div");
           div.appendChild(checkbox);
@@ -431,9 +461,10 @@
           container.appendChild(div);
         });
 
-        fetchPeriods();  // Also fetch periods for next step
+        fetchPeriods(); // Also fetch periods for next step
       });
   }
+
 
   // --------- Fetch Periods (FY or CY) Based on Selected Companies ---------
   function fetchPeriods() {
@@ -487,42 +518,55 @@
 
   // --------- Save Analysis to localStorage ---------
   function saveAnalysis() {
-    const title = document.getElementById("analysisTitle").value.trim();
-    if (!title) return alert("Please enter analysis title");
+  const title = document.getElementById("analysisTitle").value.trim();
+  if (!title) return alert("Please enter analysis title");
 
-    const allTitles = JSON.parse(localStorage.getItem("savedAnalyses") || "[]");
-    if (allTitles.includes(title)) {
-      alert("An analysis with this name already exists. Please choose a different title.");
-      return;
-    }
-
-    const selectedLineItems = Array.from(document.querySelectorAll('input[name="line_items"]:checked')).map(cb => cb.value);
-    const fromPeriod = document.getElementById("fromPeriod").value;
-    const toPeriod = document.getElementById("toPeriod").value;
-
-    // Save metadata to localStorage
-    localStorage.setItem("analysisTitle", title);
-    localStorage.setItem("selectedCompanies", JSON.stringify(companies));
-    localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
-
-    // --------- Generate Full Period Range ---------
-    const startYear = parseInt(fromPeriod.split("-")[1]);
-    const endYear = parseInt(toPeriod.split("-")[1]);
-    const prefix = fromPeriod.split("-")[0];  // e.g., FY or CY
-
-    const selectedPeriods = [];
-    for (let year = startYear; year <= endYear; year++) {
-      selectedPeriods.push(`${prefix}-${year}`);
-    }
-
-    localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
-    localStorage.setItem("savedAnalyses", JSON.stringify([...allTitles, title]));
-
-    // Move to success message step
-    document.getElementById("step3").classList.remove("active");
-    document.getElementById("step3Indicator").classList.remove("active");
-    document.getElementById("summary").classList.add("active");
+  const allTitles = JSON.parse(localStorage.getItem("savedAnalyses") || "[]");
+  if (allTitles.includes(title)) {
+    alert("An analysis with this name already exists. Please choose a different title.");
+    return;
   }
+
+  const selectedLineItems = Array.from(document.querySelectorAll('input[name="line_items"]:checked')).map(cb => cb.value);
+  const fromPeriod = document.getElementById("fromPeriod").value;
+  const toPeriod = document.getElementById("toPeriod").value;
+
+  localStorage.setItem("analysisTitle", title);
+  localStorage.setItem("selectedCompanies", JSON.stringify(companies));
+  localStorage.setItem("selectedLineItems", JSON.stringify(selectedLineItems));
+
+  // Generate period range
+  const startYear = parseInt(fromPeriod.split("-")[1]);
+  const endYear = parseInt(toPeriod.split("-")[1]);
+  const prefix = fromPeriod.split("-")[0];
+
+    if (startYear > endYear) {
+    alert("Invalid period range: 'From' year should be earlier than or equal to 'To' year.");
+    return;
+  }
+
+  const selectedPeriods = [];
+  for (let year = startYear; year <= endYear; year++) {
+    selectedPeriods.push(`${prefix}-${year}`);
+  }
+
+  localStorage.setItem("selectedPeriods", JSON.stringify(selectedPeriods));
+  localStorage.setItem("savedAnalyses", JSON.stringify([...allTitles, title]));
+
+  // ✅ FINAL MISSING STEP: Save full analysis object
+  const analysisObject = {
+    selectedCompanies: companies,
+    selectedLineItems,
+    selectedPeriods,
+    selectedCompanyObjects,
+  };
+  localStorage.setItem(`analysis_${title}`, JSON.stringify(analysisObject));
+
+  // Move to success screen
+  document.getElementById("step3").classList.remove("active");
+  document.getElementById("step3Indicator").classList.remove("active");
+  document.getElementById("summary").classList.add("active");
+}
 
   // --------- Restore State on Page Reload (Pre-Fill Step 1) ---------
   window.onload = function () {
